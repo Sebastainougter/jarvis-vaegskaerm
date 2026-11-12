@@ -6,135 +6,148 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="theme-color" content="#05080d">
-<title>Vægskærm</title>
+<meta name="theme-color" content="#000306">
+<title>J.A.R.V.I.S · Vægskærm</title>
 <link rel="icon" href="data:,">
 <style>
-:root{--bg:#05080d;--pan:#0c131c;--line:#1c2a38;--txt:#f2f7fb;--dim:#93a6b8;--acc:#36d7ff;--warm:#ffb547;--hot:#ff5d4a;--ok:#4ef0a0}
+:root{--cy:0,229,255;--bl:64,156,255;--hot:255,106,61;--warm:255,176,64;--ok:80,255,170;--txt:#dffcff;--mono:ui-monospace,"SF Mono",Menlo,Consolas,"Liberation Mono",monospace}
 *{box-sizing:border-box}
-html,body{margin:0;height:100%;background:var(--bg);color:var(--txt);font-family:-apple-system,"SF Pro Display","Helvetica Neue",Helvetica,Arial,sans-serif;overflow:hidden;-webkit-user-select:none;user-select:none;-webkit-font-smoothing:antialiased}
-#wrap{position:fixed;top:0;left:0;right:0;bottom:0;padding:16px 18px 10px;display:-webkit-box;display:flex;-webkit-box-orient:vertical;flex-direction:column;transition:transform 2s,opacity 3s}
-#wrap.night{opacity:.62}
-.grid{-webkit-box-flex:1;flex:1;display:grid;grid-template-columns:1.25fr 1fr 1fr;grid-template-rows:168px 158px minmax(0,1fr);grid-gap:12px;gap:12px;min-height:0}
-.pan{background:var(--pan);border:1px solid var(--line);border-radius:18px;padding:14px 18px;overflow:hidden;min-height:0;position:relative}
-.pan h2{margin:0 0 6px;font-size:15px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--acc)}
-.span2{grid-column:span 2}
-/* ur */
-#clockPan{display:-webkit-box;display:flex;-webkit-box-align:center;align-items:center;justify-content:space-between}
-#clock{font-size:132px;line-height:.95;font-weight:200;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
-#clock .s{font-size:46px;color:var(--dim);font-weight:300;margin-left:6px}
-#dateBox{text-align:right}
-#wday{font-size:38px;font-weight:600;text-transform:capitalize}
-#date{font-size:27px;color:var(--dim);margin-top:4px}
-#week{display:inline-block;margin-top:8px;font-size:22px;font-weight:700;color:var(--bg);background:var(--acc);border-radius:10px;padding:4px 12px}
-/* vejr nu */
-#days{margin-top:6px;border-top:1px solid var(--line);padding-top:2px}
-#sun{font-size:20px;color:var(--dim);margin-top:8px}
-#sun b{color:var(--txt)}
-#nowPan .row{display:-webkit-box;display:flex;-webkit-box-align:center;align-items:center}
-#nowIcon{font-size:54px;line-height:1;margin-right:14px}
-#nowTemp{font-size:60px;font-weight:300;line-height:1}
-#nowDesc{font-size:21px;font-weight:600;margin-top:2px}
-#nowMeta{font-size:17px;color:var(--dim);margin-top:6px;line-height:1.4}
-#nowMeta b{color:var(--txt);font-weight:600}
-/* timer */
-#hours{display:-webkit-box;display:flex;justify-content:space-between}
-.hr{text-align:center;-webkit-box-flex:1;flex:1}
-.hr .t{font-size:18px;color:var(--dim)}
-.hr .i{font-size:34px;line-height:1.25}
-.hr .v{font-size:26px;font-weight:600}
-.hr .p{font-size:16px;color:var(--acc);min-height:20px}
-/* 5 dage */
-.day{display:-webkit-box;display:flex;-webkit-box-align:center;align-items:center;font-size:19px;padding:1px 0;border-bottom:1px solid var(--line)}
-.day:last-child{border-bottom:0}
-.day .n{width:52px;font-weight:700;text-transform:capitalize}
-.day .i{width:40px;font-size:22px;text-align:center}
-.day .hl{-webkit-box-flex:1;flex:1;text-align:right;font-variant-numeric:tabular-nums}
-.day .hl span{color:var(--dim)}
-.day .r{width:78px;text-align:right;color:var(--acc);font-size:17px}
-/* lister */
-.item{display:-webkit-box;display:flex;-webkit-box-align:baseline;align-items:baseline;font-size:21px;line-height:1.25;padding:4px 0}
-.item small{color:var(--dim);font-size:16px;margin-left:6px}
-.item .tm{min-width:70px;font-weight:700;color:var(--warm);font-variant-numeric:tabular-nums}
-.item.done{opacity:.38}
+html,body{margin:0;height:100%;background:#000306;color:#bff6ff;font-family:var(--mono);overflow:hidden;-webkit-user-select:none;user-select:none;-webkit-font-smoothing:antialiased}
+#bg,#rx{position:absolute;display:block}
+#bg{left:0;top:0}
+#fx{position:fixed;left:0;top:0;right:0;bottom:0;z-index:6;pointer-events:none;background:repeating-linear-gradient(0deg,rgba(0,0,0,.10) 0,rgba(0,0,0,.10) 1px,transparent 1px,transparent 3px),radial-gradient(ellipse at center,rgba(0,0,0,0) 45%,rgba(0,0,0,.6) 100%)}
+#sweep{position:fixed;left:0;right:0;top:-120px;height:120px;z-index:6;pointer-events:none;background:linear-gradient(rgba(0,229,255,0),rgba(0,229,255,.04),rgba(0,229,255,0));-webkit-animation:sw 14s linear infinite;animation:sw 14s linear infinite}
+@-webkit-keyframes sw{to{-webkit-transform:translateY(1100px)}}
+@keyframes sw{to{transform:translateY(1100px)}}
+#wrap{position:fixed;left:0;top:0;right:0;bottom:0;transition:transform 2s,opacity 3s}
+#wrap.night{opacity:.6}
+#cols{position:absolute;left:18px;right:18px;top:38px;bottom:92px;display:-webkit-box;display:flex}
+.col{width:330px;display:-webkit-box;display:flex;-webkit-box-orient:vertical;flex-direction:column;z-index:2}
+.mid{-webkit-box-flex:1;flex:1;display:-webkit-box;display:flex;-webkit-box-orient:vertical;flex-direction:column;padding:0 14px;min-width:0;z-index:2}
+.pan{position:relative;background:rgba(0,30,46,.46);border:1px solid rgba(var(--cy),.32);-webkit-clip-path:polygon(14px 0,100% 0,100% calc(100% - 14px),calc(100% - 14px) 100%,0 100%,0 14px);clip-path:polygon(14px 0,100% 0,100% calc(100% - 14px),calc(100% - 14px) 100%,0 100%,0 14px);padding:12px 16px;overflow:hidden;margin-bottom:12px}
+.pan:last-child{margin-bottom:0}
+.pan::after{content:"";position:absolute;right:0;bottom:0;width:20px;height:20px;border-right:2px solid rgba(var(--cy),.75);border-bottom:2px solid rgba(var(--cy),.75);-webkit-clip-path:polygon(100% 0,100% 100%,0 100%);clip-path:polygon(100% 0,100% 100%,0 100%)}
+.grow{-webkit-box-flex:1;flex:1;min-height:0}
+.pan h2{margin:0 0 9px;font-size:13px;letter-spacing:.16em;font-weight:600;color:rgba(var(--cy),.78);white-space:nowrap}
+.pan h2::before{content:"";display:inline-block;width:30px;height:3px;background:rgb(var(--cy));vertical-align:middle;margin-right:9px;box-shadow:0 0 8px rgb(var(--cy))}
+.pan h2 span{float:right;color:rgba(var(--cy),.45);letter-spacing:.08em}
+.glow{color:#e8fdff;text-shadow:0 0 10px rgba(var(--cy),.55)}
+.lbl{font-size:12px;letter-spacing:.12em;color:rgba(var(--cy),.6);text-transform:uppercase}
+/* feed-linje */
+#feed{position:absolute;z-index:3;left:0;right:0;top:12px;text-align:center;font-size:13px;letter-spacing:.14em;color:rgba(var(--cy),.75);white-space:nowrap}
+#feed b{color:#a0ffd2;font-weight:600}
+.dot{display:inline-block;width:9px;height:9px;border-radius:50%;background:rgb(var(--ok));margin-right:7px;vertical-align:middle;box-shadow:0 0 9px rgb(var(--ok))}
+.dot.off{background:#ff5a4a;box-shadow:0 0 9px #ff5a4a;-webkit-animation:bl 1s infinite;animation:bl 1s infinite}
+.dot.warn{background:rgb(var(--warm));box-shadow:0 0 9px rgb(var(--warm))}
+.dot.blink{-webkit-animation:bl 1.6s infinite;animation:bl 1.6s infinite}
+@-webkit-keyframes bl{50%{opacity:.3}}
+@keyframes bl{50%{opacity:.3}}
+/* reaktor + ur */
+#reactor{position:relative;-webkit-box-flex:1;flex:1;min-height:0;margin-bottom:12px}
+#clockBox{position:absolute;left:0;right:0;top:50%;-webkit-transform:translateY(-50%);transform:translateY(-50%);text-align:center;z-index:3}
+#clock{font-size:84px;font-weight:600;line-height:1;letter-spacing:.01em;color:#effeff;text-shadow:0 0 18px rgba(var(--cy),.85),0 0 42px rgba(var(--cy),.35);font-variant-numeric:tabular-nums}
+#secs{font-size:20px;color:rgba(var(--cy),.85);letter-spacing:.3em;margin-top:6px}
+#wday{font-size:19px;font-weight:600;letter-spacing:.18em;color:#dffcff;margin-top:10px;text-transform:uppercase}
+#date{font-size:15px;letter-spacing:.14em;color:rgba(var(--cy),.75);margin-top:3px;text-transform:uppercase}
+#week{display:inline-block;margin-top:9px;font-size:14px;font-weight:700;letter-spacing:.16em;color:#000306;background:rgb(var(--cy));padding:3px 10px;box-shadow:0 0 14px rgba(var(--cy),.7)}
+#quote{font-size:16px;line-height:1.4;color:#d6f8ff}
+#quote b{display:block;font-weight:600;font-size:12px;letter-spacing:.12em;color:rgba(var(--cy),.65);margin-top:4px;text-transform:uppercase}
+/* plan */
+.item{display:-webkit-box;display:flex;-webkit-box-align:baseline;align-items:baseline;font-size:18px;line-height:1.3;padding:3px 0;color:#e8fdff}
+.item .tm{min-width:66px;font-weight:700;color:rgb(var(--warm));text-shadow:0 0 8px rgba(var(--warm),.45);font-variant-numeric:tabular-nums}
+.item small{display:block;color:rgba(var(--cy),.6);font-size:12px;letter-spacing:.08em;text-transform:uppercase}
+.item.done{opacity:.36}
 .item.done .tm{text-decoration:line-through}
-.sub{font-size:15px;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);margin:10px 0 2px}
-.cd{display:-webkit-box;display:flex;-webkit-box-align:center;align-items:center;font-size:20px;padding:4px 0;border-bottom:1px solid var(--line)}
+.sub{font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:rgba(var(--cy),.6);margin:9px 0 2px}
+#trash{margin-top:9px;padding-top:7px;border-top:1px solid rgba(var(--cy),.22)}
+#trash .big{font-size:18px;font-weight:700;color:#e8fdff}
+#trash .big .when{color:rgb(var(--warm))}
+#trash .ty{font-size:14px;color:rgba(var(--cy),.75);margin-top:2px;line-height:1.4}
+/* nedtælling */
+.cd{display:-webkit-box;display:flex;-webkit-box-align:center;align-items:center;padding:4px 0;border-bottom:1px solid rgba(var(--cy),.12)}
 .cd:last-child{border-bottom:0}
-.cd .ic{width:40px;font-size:26px}
-.cd .nm{-webkit-box-flex:1;flex:1;line-height:1.2;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.cd .nm small{display:block;font-size:16px;color:var(--dim)}
-.cd .dd{font-size:28px;font-weight:700;color:var(--acc);text-align:right;min-width:70px;font-variant-numeric:tabular-nums}
-.cd .dd small{display:block;font-size:12px;font-weight:600;color:var(--dim);letter-spacing:.08em;text-transform:uppercase}
-.cd.today .dd{color:var(--warm)}
-#trash{margin-top:10px;padding-top:8px;border-top:1px solid var(--line)}
-#trash .big{font-size:22px;font-weight:700}
-#trash .big .when{color:var(--warm)}
-#trash .ty{font-size:18px;color:var(--dim);margin-top:2px}
+.cd .ic{width:34px;font-size:22px}
+.cd .nm{-webkit-box-flex:1;flex:1;min-width:0;font-size:17px;color:#e8fdff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cd .nm small{display:block;font-size:12px;color:rgba(var(--cy),.6);letter-spacing:.06em;text-transform:uppercase}
+.cd .dd{min-width:64px;text-align:right;font-size:26px;font-weight:700;color:rgb(var(--cy));text-shadow:0 0 10px rgba(var(--cy),.6);font-variant-numeric:tabular-nums}
+.cd .dd small{display:block;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:rgba(var(--cy),.6);text-shadow:none}
+.cd.today .dd{color:rgb(var(--warm));text-shadow:0 0 10px rgba(var(--warm),.6)}
 /* beskeder */
-.al{border-left:4px solid var(--acc);padding:6px 0 6px 12px;margin:0 0 9px;border-radius:2px}
-.al .m{font-size:14px;color:var(--dim);letter-spacing:.06em;text-transform:uppercase}
-.al .t{font-size:21px;line-height:1.3;margin-top:2px}
-.al.hi{border-left-color:var(--hot);background:rgba(255,93,74,.08)}
-.al.hi .m{color:var(--hot)}
-.al.new{background:rgba(54,215,255,.16)}
-.empty{font-size:20px;color:var(--dim)}
-.okbig{font-size:22px;color:var(--ok);font-weight:600}
-/* bund */
-#foot{display:-webkit-box;display:flex;-webkit-box-align:center;align-items:center;margin-top:10px;min-height:56px}
-#quote{-webkit-box-flex:1;flex:1;font-size:21px;line-height:1.3;font-style:italic;color:#d6e2ec;padding-right:18px}
-#quote b{font-style:normal;font-weight:600;color:var(--dim);font-size:17px;white-space:nowrap}
-#status{font-size:16px;color:var(--dim);text-align:right;line-height:1.5;white-space:nowrap}
-.dot{display:inline-block;width:11px;height:11px;border-radius:50%;background:var(--ok);margin-right:6px;vertical-align:middle;box-shadow:0 0 8px var(--ok)}
-.dot.off{background:var(--hot);box-shadow:0 0 8px var(--hot)}
-.dot.warn{background:var(--warm);box-shadow:0 0 8px var(--warm)}
-/* alarm-banner */
-#banner{position:fixed;left:24px;right:24px;top:20px;z-index:8;background:#0d2735;border:2px solid var(--acc);border-radius:20px;padding:20px 28px;font-size:38px;line-height:1.25;font-weight:600;display:none;box-shadow:0 10px 60px rgba(0,0,0,.7)}
-#banner.hi{background:#3a1410;border-color:var(--hot)}
-#banner .m{font-size:17px;letter-spacing:.14em;text-transform:uppercase;color:var(--acc);margin-bottom:6px}
-#banner.hi .m{color:var(--hot)}
-#unlock{position:fixed;top:0;left:0;right:0;bottom:0;z-index:10;display:-webkit-box;display:flex;-webkit-box-align:center;align-items:center;-webkit-box-pack:center;justify-content:center;background:rgba(3,5,8,.78);cursor:pointer}
-#unlock div{border:2px solid var(--acc);border-radius:20px;padding:28px 44px;font-size:32px;font-weight:600;background:#0c1a24;text-align:center}
-#unlock small{display:block;margin-top:10px;font-size:18px;color:var(--dim);font-weight:400}
-#hint{position:fixed;z-index:9;right:22px;bottom:74px;display:none;background:#0c1a24;color:var(--txt);border:1px solid var(--acc);border-radius:10px;padding:8px 14px;font:600 16px -apple-system,Helvetica,Arial,sans-serif;cursor:pointer}
+.al{border-left:2px solid rgba(var(--cy),.65);padding:5px 0 5px 11px;margin:0 0 8px;transition:background .6s}
+.al .m{font-size:11px;color:rgba(var(--cy),.62);letter-spacing:.08em;text-transform:uppercase}
+.al .t{font-size:16px;color:#dffcff;margin-top:3px;line-height:1.35}
+.al.hi{border-left-color:rgb(var(--hot));background:rgba(255,90,50,.08)}
+.al.hi .m{color:#ffb040}
+.al.new{background:rgba(var(--cy),.15)}
+.al.hi.new{background:rgba(255,120,50,.22)}
+.empty{font-size:14px;color:rgba(var(--cy),.5);letter-spacing:.06em}
+.okbig{font-size:17px;color:#a0ffd2;letter-spacing:.1em}
+/* bundbar */
+#bar{position:absolute;z-index:3;left:18px;right:18px;bottom:14px;height:64px;background:rgba(0,26,40,.62);border:1px solid rgba(var(--cy),.4);-webkit-clip-path:polygon(12px 0,calc(100% - 12px) 0,100% 12px,100% 100%,0 100%,0 12px);clip-path:polygon(12px 0,calc(100% - 12px) 0,100% 12px,100% 100%,0 100%,0 12px);display:-webkit-box;display:flex;-webkit-box-align:center;align-items:center}
+#bar::before,#bar::after{content:"";position:absolute;top:0;width:40px;height:3px;background:rgb(var(--cy));box-shadow:0 0 8px rgb(var(--cy))}
+#bar::before{left:12px}#bar::after{right:12px}
+#barGlint{position:absolute;top:0;left:0;width:160px;height:2px;background:linear-gradient(90deg,rgba(var(--cy),0),rgba(var(--cy),.9),rgba(var(--cy),0));-webkit-animation:gl 4s linear infinite;animation:gl 4s linear infinite}
+@-webkit-keyframes gl{from{-webkit-transform:translateX(0)}to{-webkit-transform:translateX(1000px)}}
+@keyframes gl{from{transform:translateX(0)}to{transform:translateX(1000px)}}
+.bc{-webkit-box-flex:1;flex:1;padding:0 16px;border-left:1px solid rgba(var(--cy),.18);white-space:nowrap;overflow:hidden}
+.bc:first-of-type{border-left:0}
+.bc .lbl{font-size:11px}
+.bc .v{font-size:15px;font-weight:600;color:#dffcff;margin-top:4px;letter-spacing:.06em}
+.bc .v.g{color:#a0ffd2}
+#meter{display:inline-block;vertical-align:middle;margin-left:10px;height:16px}
+#meter i{display:inline-block;width:4px;margin-right:2px;background:rgba(var(--cy),.35);vertical-align:bottom;height:3px;transition:height .12s}
+/* alarm-transmission */
+#banner{position:fixed;z-index:8;left:50%;bottom:96px;width:760px;max-width:calc(100% - 40px);-webkit-transform:translateX(-50%);transform:translateX(-50%);background:rgba(0,22,34,.9);border:1px solid rgba(var(--cy),.5);padding:14px 20px 18px;display:none;box-shadow:0 0 40px rgba(var(--cy),.25)}
+#banner .m{font-size:13px;font-weight:600;letter-spacing:.14em;color:rgba(var(--cy),.8);text-transform:uppercase;margin-bottom:8px}
+#banner .t{font-size:30px;line-height:1.3;color:#e8fdff;text-shadow:0 0 10px rgba(var(--cy),.8)}
+#banner .t::after{content:"";display:inline-block;width:.5em;height:.9em;background:rgb(var(--cy));margin-left:6px;vertical-align:-2px;-webkit-animation:bl 1s infinite;animation:bl 1s infinite}
+#banner.hi{border-color:rgba(var(--hot),.8);box-shadow:0 0 50px rgba(var(--hot),.35);background:rgba(40,12,6,.92)}
+#banner.hi .m{color:#ffb040}
+#banner.hi .t{text-shadow:0 0 10px rgba(var(--hot),.8)}
+#banner.hi .t::after{background:rgb(var(--warm))}
+#unlock{position:fixed;left:0;top:0;right:0;bottom:0;z-index:10;display:-webkit-box;display:flex;-webkit-box-align:center;align-items:center;-webkit-box-pack:center;justify-content:center;background:rgba(0,3,6,.72);cursor:pointer;-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px)}
+#unlock div{border:1px solid rgba(var(--cy),.6);padding:24px 38px;color:#dffcff;font-size:24px;letter-spacing:.08em;background:rgba(0,40,60,.6);text-align:center;box-shadow:0 0 30px rgba(var(--cy),.25)}
+#unlock small{display:block;margin-top:9px;font-size:14px;color:rgba(var(--cy),.7)}
+#hint{position:fixed;z-index:9;left:50%;-webkit-transform:translateX(-50%);transform:translateX(-50%);top:34px;display:none;background:rgba(0,40,60,.75);color:#dffcff;border:1px solid rgba(var(--cy),.5);border-radius:4px;padding:6px 12px;font:600 13px var(--mono);letter-spacing:.06em;cursor:pointer}
 </style>
 </head>
 <body>
 <div id="wrap">
-  <div class="grid">
-    <div class="pan span2" id="clockPan">
-      <div id="clock">--:--</div>
-      <div id="dateBox"><div id="wday"></div><div id="date"></div><div><span id="week"></span></div><div id="sun"></div></div>
-    </div>
-    <div class="pan" id="nowPan" style="grid-row:span 2">
-      <h2>Vejret i Køge</h2>
-      <div class="row"><div id="nowIcon">·</div><div><div id="nowTemp">--°</div><div id="nowDesc">Henter vejr…</div></div></div>
-      <div id="nowMeta"></div>
-      <div id="days"></div>
-    </div>
-    <div class="pan span2"><h2>De næste timer</h2><div id="hours"></div></div>
-    <div class="pan"><h2>I dag</h2><div id="plan"></div><div id="trash"></div></div>
-    <div class="pan"><h2>Nedtælling</h2><div id="countdown"></div></div>
-    <div class="pan" id="alerts"><h2>Beskeder</h2><div id="alertList"><div class="empty">Henter…</div></div></div>
+<canvas id="bg"></canvas>
+<div id="feed"><span class="dot blink" id="fdot"></span><b>SYSTEMS ONLINE</b> &nbsp;·&nbsp; <span id="ftxt">FORBINDER…</span> &nbsp;·&nbsp; <span id="wl">J.A.R.V.I.S</span></div>
+<div id="cols">
+  <div class="col">
+    <div class="pan"><h2>I DAG<span id="planTag"></span></h2><div id="plan"></div><div id="trash"></div></div>
+    <div class="pan grow"><h2>NEDTÆLLING</h2><div id="countdown"></div></div>
   </div>
-  <div id="foot"><div id="quote"></div><div id="status"></div></div>
+  <div class="mid">
+    <div id="reactor"><canvas id="rx"></canvas>
+      <div id="clockBox"><div id="clock">--:--</div><div id="secs"></div><div id="wday"></div><div id="date"></div><div><span id="week"></span></div></div>
+    </div>
+    <div class="pan"><h2>DAGENS CITAT</h2><div id="quote"></div></div>
+  </div>
+  <div class="col">
+    <div class="pan grow" id="alerts"><h2>SENESTE BESKEDER</h2><div id="alertList"><div class="empty">HENTER…</div></div></div>
+  </div>
 </div>
-<div id="banner"><div class="m" id="bannerMeta"></div><div id="bannerText"></div></div>
-<button id="hint">🔇 Tryk for lyd</button>
-<div id="unlock"><div>Tryk for at aktivere lyd<small>og holde skærmen tændt</small></div></div>
+<div id="bar"><div id="barGlint"></div>
+  <div class="bc"><div class="lbl">System</div><div class="v g"><span class="dot blink"></span>SYSTEMSTATUS: ONLINE</div></div>
+  <div class="bc"><div class="lbl">Netværk</div><div class="v" id="netV"><span class="dot"></span>OK</div></div>
+  <div class="bc"><div class="lbl">Beskedfeed</div><div class="v" id="feedV"><span class="dot warn"></span>FORBINDER</div></div>
+  <div class="bc"><div class="lbl">Stemme</div><div class="v"><span class="dot warn blink" id="vDot"></span><span id="vTxt">STANDBY</span><span id="meter"></span></div></div>
+</div>
+</div>
+<div id="fx"></div><div id="sweep"></div>
+<div id="banner"><div class="m" id="bannerMeta"></div><div class="t" id="bannerText"></div></div>
+<button id="hint">🔇 TRYK FOR LYD</button>
+<div id="unlock"><div>TRYK FOR AT AKTIVERE LYD<small>og holde skærmen tændt</small></div></div>
 <script>
 (function () {
 "use strict";
 // ===== Konfiguration =====
-var VERSION = "2026-11-12-v2";
+var VERSION = "2026-11-12-v3b";
 var SHEET_ID = "1_SjOK0DQG3GgGA3X7HCLNKHOP8cP3NDSFpsZ-6WKF_k";
 var POLL_SECONDS = 60;
-var LAT = 55.46, LON = 12.18;
-var WEATHER_URL = "https://api.open-meteo.com/v1/forecast?latitude=" + LAT + "&longitude=" + LON +
-  "&current=temperature_2m,apparent_temperature,weather_code,wind_speed_10m,wind_gusts_10m,wind_direction_10m,precipitation,is_day" +
-  "&hourly=temperature_2m,weather_code,precipitation_probability,precipitation,is_day" +
-  "&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,sunrise,sunset,wind_speed_10m_max" +
-  "&wind_speed_unit=ms&timezone=Europe%2FCopenhagen&forecast_days=7";
 // Familie: [navn, dag, måned, fødselsår, ikon]
 var BIRTHDAYS = [
   ["Christina", 14, 11, 2007], ["Stine", 22, 11, 1998], ["Elliot", 20, 8, 2023], ["Lily", 30, 5, 2025],
@@ -198,7 +211,6 @@ function $(id) { return document.getElementById(id); }
 function esc(s) { var d = document.createElement("div"); d.textContent = s == null ? "" : String(s); return d.innerHTML; }
 function pad(n) { return (n < 10 ? "0" : "") + n; }
 var DAGE = ["søndag", "mandag", "tirsdag", "onsdag", "torsdag", "fredag", "lørdag"];
-var DAGE_K = ["søn", "man", "tir", "ons", "tor", "fre", "lør"];
 var MDR = ["januar", "februar", "marts", "april", "maj", "juni", "juli", "august", "september", "oktober", "november", "december"];
 function hm(d) { return pad(d.getHours()) + ":" + pad(d.getMinutes()); }
 function midnight(d) { return new Date(d.getFullYear(), d.getMonth(), d.getDate()); }
@@ -215,71 +227,162 @@ function parseLocal(s) { // "2026-11-12T21:00" eller "2026-11-12"
 }
 function dageTekst(n) { return n === 0 ? "i dag" : n === 1 ? "i morgen" : "om " + n + " dage"; }
 
+// ---------- J.A.R.V.I.S HUD: baggrund + arc-reaktor (ES5, let for iPad) ----------
+var HUD = (function () {
+  var bg = $("bg"), rx = $("rx"), box = $("reactor");
+  var bctx = bg.getContext ? bg.getContext("2d") : null, ctx = rx.getContext ? rx.getContext("2d") : null;
+  var DPR = Math.min(2, window.devicePixelRatio || 1), W = 0, H = 0, S = 0, R = 0;
+  var talk = 0, hot = 0, hotT = 0, amp = 0, flare = 0, last = 0, t0 = Date.now();
+  var NB = 96, bins = [], binPh = [], binF = [], i;
+  for (i = 0; i < NB; i++) { bins.push(0); binPh.push(Math.random() * 6.28); binF.push(3 + Math.random() * 8); }
+  var rings = [
+    { r: 0.52, w: 1.2, sp: 0.35, kind: 0, seg: 72, gap: 0.5, a: 0.5 },
+    { r: 0.585, w: 3, sp: -0.22, kind: 1, seg: 3, gap: 0.35, a: 0.85 },
+    { r: 0.65, w: 1, sp: 0.12, kind: 2, seg: 180, gap: 0, a: 0.5 },
+    { r: 0.74, w: 6, sp: 0.08, kind: 1, seg: 5, gap: 0.55, a: 0.33 },
+    { r: 0.8, w: 1.4, sp: -0.15, kind: 3, seg: 1, gap: 0, a: 0.6 },
+    { r: 0.87, w: 2, sp: 0.05, kind: 0, seg: 120, gap: 0.6, a: 0.33 },
+    { r: 0.93, w: 1, sp: -0.04, kind: 2, seg: 60, gap: 0, a: 0.42 },
+    { r: 0.99, w: 9, sp: 0.03, kind: 1, seg: 2, gap: 0.8, a: 0.12 }
+  ];
+  var ang = rings.map(function () { return Math.random() * 6.28; });
+  var parts = [];
+  for (i = 0; i < 40; i++) parts.push({ a: Math.random() * 6.28, r: 0.3 + Math.random() * 0.75, v: 0.02 + Math.random() * 0.06, z: Math.random(), ph: Math.random() * 6.28 });
+  function mix(a, b, k) { return [Math.round(a[0] + (b[0] - a[0]) * k), Math.round(a[1] + (b[1] - a[1]) * k), Math.round(a[2] + (b[2] - a[2]) * k)].join(","); }
+  var CY = "0,229,255", BL = "64,156,255";
+  function col(c, a) { return "rgba(" + c + "," + Math.max(0, Math.min(1, a)).toFixed(3) + ")"; }
+  function pad3(n) { n = String(n); while (n.length < 3) n = "0" + n; return n; }
+
+  function drawBg() {
+    if (!bctx) return;
+    W = window.innerWidth; H = window.innerHeight;
+    bg.width = Math.round(W * DPR); bg.height = Math.round(H * DPR); bg.style.width = W + "px"; bg.style.height = H + "px";
+    var c = bctx; c.setTransform(DPR, 0, 0, DPR, 0, 0);
+    var r = box.getBoundingClientRect(), cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+    var g = c.createRadialGradient(cx, cy, 0, cx, cy, Math.max(W, H) * 0.8);
+    g.addColorStop(0, "#04202e"); g.addColorStop(0.45, "#020b14"); g.addColorStop(1, "#000306");
+    c.fillStyle = g; c.fillRect(0, 0, W, H);
+    var hz = H * 0.72, k, y, x;
+    c.lineWidth = 1;
+    for (i = 0; i < 14; i++) { k = Math.pow(i / 13, 2); y = hz + k * (H - hz + 40); c.strokeStyle = col(BL, 0.05 + 0.06 * (i / 13)); c.beginPath(); c.moveTo(0, y); c.lineTo(W, y); c.stroke(); }
+    for (i = -16; i <= 16; i++) { c.strokeStyle = col(BL, 0.07); c.beginPath(); c.moveTo(cx + i * 8, hz); c.lineTo(cx + i * W * 0.12, H + 40); c.stroke(); }
+    c.strokeStyle = col(CY, 0.035); c.beginPath();
+    for (x = 0; x < W; x += 44) { c.moveTo(x, 0); c.lineTo(x, hz); }
+    for (y = 0; y < hz; y += 44) { c.moveTo(0, y); c.lineTo(W, y); }
+    c.stroke();
+  }
+  function resize() {
+    drawBg();
+    if (!ctx) return;
+    var r = box.getBoundingClientRect();
+    S = Math.max(120, Math.min(r.width, r.height));
+    R = S / 2 - 6;
+    rx.width = Math.round(S * DPR); rx.height = Math.round(S * DPR);
+    rx.style.width = S + "px"; rx.style.height = S + "px";
+    rx.style.left = (r.width - S) / 2 + "px"; rx.style.top = (r.height - S) / 2 + "px";
+  }
+  function glow(w, a, path) {
+    ctx.lineWidth = w * 3.5; ctx.strokeStyle = col(BL, a * 0.18); ctx.beginPath(); path(); ctx.stroke();
+    ctx.lineWidth = w; ctx.strokeStyle = col(CY, a); ctx.beginPath(); path(); ctx.stroke();
+  }
+  function ring(rg, r, an, a, ri) {
+    var TAU = Math.PI * 2, step = TAU / rg.seg, j, s0, th, x, y;
+    if (rg.kind === 0 || rg.kind === 1) {
+      glow(rg.w, a, function () { for (j = 0; j < rg.seg; j++) { s0 = an + j * step; ctx.moveTo(Math.cos(s0) * r, Math.sin(s0) * r); ctx.arc(0, 0, r, s0, s0 + step * (1 - rg.gap)); } });
+      if (rg.kind === 1) { ctx.fillStyle = col(CY, a); for (j = 0; j < rg.seg; j++) { s0 = an + j * step; ctx.beginPath(); ctx.arc(Math.cos(s0) * r, Math.sin(s0) * r, rg.w * 0.35 + 1.2, 0, TAU); ctx.fill(); } }
+    } else if (rg.kind === 2) {
+      ctx.lineWidth = 1;
+      for (j = 0; j < rg.seg; j++) {
+        th = an + j / rg.seg * TAU; var big = j % 5 === 0, l = big ? 9 : 4;
+        ctx.strokeStyle = col(CY, a * (big ? 1 : 0.55)); ctx.beginPath();
+        ctx.moveTo(Math.cos(th) * r, Math.sin(th) * r); ctx.lineTo(Math.cos(th) * (r - l), Math.sin(th) * (r - l)); ctx.stroke();
+      }
+    } else {
+      glow(rg.w, a * 0.5, function () { ctx.arc(0, 0, r, 0, TAU); });
+      var sw = 0.9 + amp * 1.2;
+      glow(rg.w * 2.2, a, function () { ctx.arc(0, 0, r, an, an + sw); });
+      glow(rg.w * 2.2, a, function () { ctx.arc(0, 0, r, an + Math.PI, an + Math.PI + sw * 0.6); });
+      ctx.fillStyle = col(CY, a);
+      for (j = 0; j < 4; j++) { th = -an * 0.7 + j / 4 * TAU; ctx.save(); ctx.translate(Math.cos(th) * r, Math.sin(th) * r); ctx.rotate(th + Math.PI / 4); ctx.fillRect(-3, -3, 6, 6); ctx.restore(); }
+      ctx.font = "9px ui-monospace, Menlo, Consolas, monospace"; ctx.fillStyle = col(CY, a * 0.8);
+      for (j = 0; j < 8; j++) { th = an * 0.5 + j / 8 * TAU + 0.2; ctx.save(); ctx.translate(Math.cos(th) * (r + 10), Math.sin(th) * (r + 10)); ctx.rotate(th + Math.PI / 2); ctx.fillText(pad3((j * 45 + ri * 7) % 360), -8, 0); ctx.restore(); }
+    }
+  }
+  function frame() {
+    var now = Date.now(), time = (now - t0) / 1000, dt = Math.min(0.1, (now - last) / 1000 || 0.03);
+    // idle: ca. 20 fps, ved tale: ca. 40 fps
+    if (now - last < (talk ? 24 : 48)) { req(); return; }
+    last = now;
+    var tgt = talk ? 0.35 + 0.5 * Math.abs(Math.sin(time * 9.3)) * (0.7 + 0.3 * Math.sin(time * 23)) : 0.07 + 0.05 * Math.sin(time * 0.9);
+    amp += (tgt - amp) * Math.min(1, dt * (tgt > amp ? 20 : 8));
+    flare = Math.max(0, flare - dt * 1.2);
+    hot += (hotT - hot) * Math.min(1, dt * 2.5);
+    CY = mix([0, 229, 255], [255, 176, 64], hot); BL = mix([64, 156, 255], [255, 80, 60], hot);
+    for (i = 0; i < NB; i++) { var sym = Math.abs(i / NB * 2 - 1), v = (0.5 + 0.5 * Math.sin(time * binF[i] + binPh[i])) * (0.55 + 0.45 * Math.sin(time * 1.7 + sym * 6)); bins[i] += (amp * v - bins[i]) * Math.min(1, dt * 16); }
+    if (ctx) {
+      var C = S / 2;
+      ctx.setTransform(DPR, 0, 0, DPR, 0, 0); ctx.clearRect(0, 0, S, S);
+      ctx.globalCompositeOperation = "lighter";
+      var h = ctx.createRadialGradient(C, C, R * 0.05, C, C, R * (1.05 + amp * 0.25));
+      h.addColorStop(0, col(CY, 0.16 + amp * 0.25)); h.addColorStop(0.35, col(BL, 0.08 + amp * 0.1)); h.addColorStop(1, col(BL, 0));
+      ctx.fillStyle = h; ctx.beginPath(); ctx.arc(C, C, R, 0, Math.PI * 2); ctx.fill();
+      ctx.setTransform(DPR, 0, 0, DPR, DPR * C, DPR * C);
+      for (i = 0; i < parts.length; i++) {
+        var p = parts[i]; p.a += p.v * dt * (1 + amp * 3);
+        var tw = 0.5 + 0.5 * Math.sin(time * 2 + p.ph);
+        ctx.fillStyle = col(CY, 0.1 + 0.4 * tw * p.z); var s = 0.8 + p.z * 1.6;
+        ctx.fillRect(Math.cos(p.a) * p.r * R, Math.sin(p.a) * p.r * R, s, s);
+      }
+      var spd = 1 + amp * 3 + flare * 3;
+      for (i = 0; i < rings.length; i++) {
+        ang[i] += rings[i].sp * dt * spd * (i % 2 ? 1.3 : 1);
+        ring(rings[i], R * rings[i].r * (1 + flare * 0.04 * (i % 3)), ang[i], rings[i].a * (0.75 + amp * 0.6 + flare * 0.5), i);
+      }
+      // lyd-spektrum rundt om uret
+      var r0 = R * 0.47;
+      ctx.lineWidth = Math.max(1, Math.PI * 2 * r0 / NB * 0.5);
+      for (i = 0; i < NB; i++) {
+        var th = i / NB * Math.PI * 2 - Math.PI / 2 + time * 0.05, bv = bins[i], len = R * (0.01 + bv * 0.05), cs = Math.cos(th), sn = Math.sin(th);
+        ctx.strokeStyle = col(CY, 0.3 + bv * 1.1); ctx.beginPath(); ctx.moveTo(cs * r0, sn * r0); ctx.lineTo(cs * (r0 + len), sn * (r0 + len)); ctx.stroke();
+      }
+      if (flare > 0.01) { ctx.strokeStyle = col(CY, flare * 0.6); ctx.lineWidth = 2 + flare * 4; ctx.beginPath(); ctx.arc(0, 0, R * (1.0 - flare * 0.45), 0, Math.PI * 2); ctx.stroke(); }
+      ctx.globalCompositeOperation = "source-over";
+    }
+    req();
+  }
+  var raf = window.requestAnimationFrame || function (f) { return setTimeout(f, 40); };
+  function req() { raf(frame); }
+  window.addEventListener("resize", function () { setTimeout(resize, 50); });
+  resize(); req();
+  return {
+    resize: resize,
+    talk: function (on, hi) { talk = on ? 1 : 0; if (on) { flare = 1; hotT = hi ? 1 : 0; } else setTimeout(function () { if (!talk) hotT = 0; }, 6000); },
+    level: function () { return amp; }
+  };
+})();
+// stemme-meter i bundbaren
+(function () {
+  var m = $("meter"), bars = [], k;
+  for (k = 0; k < 14; k++) { var b = document.createElement("i"); m.appendChild(b); bars.push(b); }
+  setInterval(function () { var a = HUD.level(), t = Date.now() / 1000; for (k = 0; k < bars.length; k++) bars[k].style.height = Math.round(3 + Math.min(1, a * (0.6 + 0.4 * Math.abs(Math.sin(t * (3 + k) + k)))) * 13) + "px"; }, 150);
+})();
+
 // ---------- Ur ----------
 function tickClock() {
   var d = new Date();
-  $("clock").innerHTML = hm(d) + '<span class="s">' + pad(d.getSeconds()) + "</span>";
+  $("clock").textContent = hm(d);
+  $("secs").textContent = ":" + pad(d.getSeconds());
   $("wday").textContent = DAGE[d.getDay()];
   $("date").textContent = d.getDate() + ". " + MDR[d.getMonth()] + " " + d.getFullYear();
-  $("week").textContent = "Uge " + isoWeek(d);
+  $("week").textContent = "UGE " + isoWeek(d);
   var h = d.getHours();
   $("wrap").className = (h >= 23 || h < 6) ? "night" : "";
-}
-
-// ---------- Vejr ----------
-var WMO = {0:["Klart","☀️","🌙"],1:["Mest klart","🌤️","🌙"],2:["Delvis skyet","⛅","☁️"],3:["Overskyet","☁️","☁️"],45:["Tåge","🌫️"],48:["Rimtåge","🌫️"],
-51:["Let støvregn","🌦️","🌧️"],53:["Støvregn","🌧️"],55:["Tæt støvregn","🌧️"],56:["Isslag","🧊"],57:["Kraftigt isslag","🧊"],61:["Let regn","🌦️","🌧️"],63:["Regn","🌧️"],65:["Kraftig regn","🌧️"],
-66:["Isregn","🧊"],67:["Kraftig isregn","🧊"],71:["Let sne","🌨️"],73:["Sne","🌨️"],75:["Kraftig sne","❄️"],77:["Snefnug","🌨️"],80:["Lette byger","🌦️","🌧️"],81:["Regnbyger","🌧️"],82:["Kraftige byger","⛈️"],
-85:["Snebyger","🌨️"],86:["Kraftige snebyger","❄️"],95:["Torden","⛈️"],96:["Torden med hagl","⛈️"],99:["Kraftig torden med hagl","⛈️"]};
-function wDesc(c) { return (WMO[c] || ["Ukendt"])[0]; }
-function wIcon(c, day) { var w = WMO[c]; if (!w) return "❔"; return (!day && w[2]) ? w[2] : w[1]; }
-function windDir(deg) { return ["N", "NØ", "Ø", "SØ", "S", "SV", "V", "NV"][Math.round(((deg % 360) / 45)) % 8]; }
-function num(v, dec) { return (dec ? v.toFixed(dec) : String(Math.round(v))).replace(".", ","); }
-var weatherOk = 0, weatherFail = false;
-function loadWeather() {
-  return fetch(WEATHER_URL, { cache: "no-store" }).then(function (r) { if (!r.ok) throw new Error("http " + r.status); return r.json(); }).then(function (w) {
-    renderWeather(w); weatherOk = Date.now(); weatherFail = false; renderStatus();
-  }).catch(function () { weatherFail = true; renderStatus(); });
-}
-function renderWeather(w) {
-  var c = w.current, dl = w.daily, hr = w.hourly;
-  $("nowIcon").textContent = wIcon(c.weather_code, c.is_day);
-  $("nowTemp").textContent = num(c.temperature_2m) + "°";
-  $("nowDesc").textContent = wDesc(c.weather_code);
-  var sr = parseLocal(dl.sunrise[0]), ss = parseLocal(dl.sunset[0]);
-  var now = new Date();
-  var len = Math.round((ss - sr) / 60000);
-  var pp = dl.precipitation_probability_max[0];
-  $("nowMeta").innerHTML =
-    "Føles som <b>" + num(c.apparent_temperature) + "°</b> · i dag <b>" + num(dl.temperature_2m_max[0]) + "°</b> / " + num(dl.temperature_2m_min[0]) + "°<br>" +
-    "💧 <b>" + num(dl.precipitation_sum[0], 1) + " mm</b>" + (pp == null ? "" : " (" + pp + "%)") + " · 💨 <b>" + num(c.wind_speed_10m) + "</b> (" + num(c.wind_gusts_10m) + ") m/s " + windDir(c.wind_direction_10m);
-  $("sun").innerHTML = "🌅 <b>" + hm(sr) + "</b> &nbsp;🌇 <b>" + hm(ss) + "</b> &nbsp;" + Math.floor(len / 60) + "t " + (len % 60) + "m";
-  // næste timer
-  var start = 0, nowH = new Date(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours());
-  for (var i = 0; i < hr.time.length; i++) { if (parseLocal(hr.time[i]) >= nowH) { start = i; break; } }
-  var html = "";
-  for (var k = 0; k < 8; k++) {
-    var j = start + k * 2; if (j >= hr.time.length) break;
-    var t = parseLocal(hr.time[j]), p = hr.precipitation_probability[j], mm = hr.precipitation[j];
-    html += '<div class="hr"><div class="t">' + (k === 0 ? "Nu" : pad(t.getHours())) + '</div><div class="i">' + wIcon(hr.weather_code[j], hr.is_day[j]) +
-      '</div><div class="v">' + num(hr.temperature_2m[j]) + '°</div><div class="p">' + (p >= 20 || mm > 0 ? "💧" + p + "%" : "") + "</div></div>";
-  }
-  $("hours").innerHTML = html;
-  // 5 dage (fra i morgen)
-  var dh = "";
-  for (var n = 1; n <= 5 && n < dl.time.length; n++) {
-    var dd = parseLocal(dl.time[n]);
-    dh += '<div class="day"><div class="n">' + DAGE_K[dd.getDay()] + '</div><div class="i">' + wIcon(dl.weather_code[n], 1) +
-      '</div><div class="hl">' + num(dl.temperature_2m_max[n]) + "° <span>" + num(dl.temperature_2m_min[n]) + '°</span></div><div class="r">' +
-      (dl.precipitation_sum[n] >= 0.1 ? num(dl.precipitation_sum[n], 1) + " mm" : "tørt") + "</div></div>";
-  }
-  $("days").innerHTML = dh;
 }
 
 // ---------- Familieplan ----------
 function planFor(d) {
   var wd = d.getDay();
-  if (wd === 0 || wd === 6) return [{ tm: "", txt: "Weekend, ingen institution 🎈" }];
+  if (wd === 0 || wd === 6) return [{ tm: "--:--", txt: "Weekend, ingen institution 🎈" }];
   var p = [{ tm: "08:00", txt: "Sebastian afleverer", who: "Vallø Børnehus" }];
   if (wd === 2) p.push({ tm: "11:00", txt: "Farmordag: farmor henter 👵" });
   else p.push({ tm: "15:00", txt: "Louise henter" });
@@ -300,6 +403,7 @@ function renderPlan() {
     planFor(tm).forEach(function (it) { html += '<div class="item"><span class="tm">' + esc(it.tm) + "</span><span>" + esc(it.txt) + (it.who ? "<small>" + esc(it.who) + "</small>" : "") + "</span></div>"; });
   }
   $("plan").innerHTML = html;
+  $("planTag").textContent = DAGE[now.getDay()].toUpperCase();
 }
 
 // ---------- Nedtælling ----------
@@ -348,17 +452,17 @@ function loadData() {
 function renderTrash() {
   var today = midnight(new Date());
   var next = affald.map(function (a) { return { d: parseLocal(a.dato), t: a.typer || [] }; }).filter(function (a) { return a.d >= today; }).sort(function (a, b) { return a.d - b.d; })[0];
-  if (!next) { $("trash").innerHTML = '<div class="sub">Affald</div><div class="ty">Ingen kendt dato for næste afhentning</div>'; return; }
+  if (!next) { $("trash").innerHTML = '<div class="sub">▸ Affald</div><div class="ty">Ingen kendt dato for næste afhentning</div>'; return; }
   var n = dayDiff(today, next.d);
-  $("trash").innerHTML = '<div class="sub">🗑️ Næste affald</div><div class="big">' + DAGE[next.d.getDay()] + " " + next.d.getDate() + ". " + MDR[next.d.getMonth()] +
-    ' <span class="when">(' + dageTekst(n) + ")</span></div>" + '<div class="ty">' + next.t.map(esc).join(" · ") + (n === 1 ? "<br>Husk at stille spandene ud i aften" : "") + "</div>";
+  $("trash").innerHTML = '<div class="sub">▸ Næste affald</div><div class="big">' + DAGE[next.d.getDay()] + " " + next.d.getDate() + ". " + MDR[next.d.getMonth()] +
+    '</div><div class="big when" style="color:rgb(var(--warm));font-size:15px;letter-spacing:.1em;text-transform:uppercase">▸ ' + dageTekst(n) + "</div>" + '<div class="ty">' + next.t.map(esc).join(" · ") + (n === 1 ? "<br>Husk at stille spandene ud i aften" : "") + "</div>";
 }
 
 // ---------- Citat ----------
 function renderQuote() {
   var d = new Date(), idx = (Math.floor(midnight(d) / 864e5) + 0) % QUOTES.length;
   var q = QUOTES[idx];
-  $("quote").innerHTML = "“" + esc(q[0]) + "” <b>· " + esc(q[1]) + "</b>";
+  $("quote").innerHTML = "“" + esc(q[0]) + "”<b>▸ " + esc(q[1]) + "</b>";
 }
 
 // ---------- Beskeder fra Google Sheet (JSONP, virker uden CORS) ----------
@@ -478,18 +582,19 @@ function pump() {
   if (el) { el.className += " new"; setTimeout(function () { el.className = el.className.replace(" new", ""); }, 20000); }
   var b = $("banner");
   b.className = a.hi ? "hi" : "";
-  $("bannerMeta").textContent = (a.hi ? "⚠️ Høj prioritet · " : "🔔 ") + (a.kategori || "Besked") + " · " + a.when;
+  $("bannerMeta").textContent = "▸ TRANSMISSION · " + (a.kategori || "Besked") + " · " + a.when + (a.hi ? " · HØJ PRIORITET" : "");
+  HUD.talk(true, a.hi); setVoice(true);
   $("bannerText").textContent = a.text;
   b.style.display = "block";
   setTimeout(function () {
-    say(a.text, function () { setTimeout(function () { b.style.display = "none"; busy = false; setTimeout(pump, 1500); }, a.hi ? 25000 : 12000); });
+    say(a.text, function () { HUD.talk(false); setVoice(false); $("bannerMeta").textContent = $("bannerMeta").textContent.replace("TRANSMISSION", "AFSLUTTET"); setTimeout(function () { b.style.display = "none"; busy = false; setTimeout(pump, 1500); }, a.hi ? 25000 : 12000); });
   }, a.hi ? 900 : 500);
 }
 function renderAlerts(list) {
   var box = $("alertList");
-  if (!list.length) { box.innerHTML = '<div class="okbig">✓ Ingen alarmer</div><div class="empty" style="margin-top:6px">Intet nyt det seneste døgn.</div>'; return; }
+  if (!list.length) { box.innerHTML = '<div class="okbig"><span class="dot"></span>INGEN ALARMER</div><div class="empty" style="margin-top:8px">Intet nyt det seneste døgn, Sir.</div>'; return; }
   box.innerHTML = list.map(function (a) {
-    return '<div class="al' + (a.hi ? " hi" : "") + '" data-k="' + esc(a.k) + '"><div class="m">' + esc(a.when) + " · " + esc(a.kategori || "") + (a.hi ? " · høj prioritet" : "") + '</div><div class="t">' + esc(a.text) + "</div></div>";
+    return '<div class="al' + (a.hi ? " hi" : "") + '" data-k="' + esc(a.k) + '"><div class="m">' + esc(a.when) + " · " + esc(a.kategori || "") + (a.hi ? " · HØJ PRIORITET" : "") + '</div><div class="t">' + esc(a.text) + "</div></div>";
   }).join("");
 }
 var feedOk = 0, failCount = 0, timer = 0;
@@ -521,17 +626,19 @@ function poll() {
 }
 
 // ---------- Status ----------
+function setVoice(on) { $("vTxt").textContent = on ? "TALER" : "STANDBY"; $("vDot").className = on ? "dot" : "dot warn blink"; }
 function renderStatus() {
-  var online = navigator.onLine !== false && !weatherFail;
-  var net = online ? '<span class="dot"></span>Netværk: OK' : '<span class="dot off"></span>Netværk: offline';
-  var feed = failCount ? '<span class="dot warn"></span>Beskeder: prøver igen' + (feedOk ? " (sidst " + hm(new Date(feedOk)) + ")" : "")
-    : feedOk ? '<span class="dot"></span>Beskeder ' + hm(new Date(feedOk)) : '<span class="dot warn"></span>Beskeder: forbinder';
-  var w = weatherOk ? " · vejr " + hm(new Date(weatherOk)) : "";
-  $("status").innerHTML = net + " &nbsp; " + feed + "<br>" + esc(wlText) + w;
+  var online = navigator.onLine !== false;
+  $("netV").innerHTML = online ? '<span class="dot"></span>NETVÆRK: OK' : '<span class="dot off"></span>OFFLINE';
+  $("feedV").innerHTML = failCount ? '<span class="dot warn"></span>PRØVER IGEN' + (feedOk ? " · " + hm(new Date(feedOk)) : "")
+    : feedOk ? '<span class="dot"></span>OK · ' + hm(new Date(feedOk)) : '<span class="dot warn"></span>FORBINDER';
+  $("fdot").className = online && !failCount ? "dot blink" : "dot off";
+  $("ftxt").textContent = feedOk ? "FEED OPDATERET " + hm(new Date(feedOk)) : (failCount ? "FEED OFFLINE · PRØVER IGEN" : "FORBINDER…");
+  $("wl").textContent = wlText ? wlText.toUpperCase() : "J.A.R.V.I.S";
 }
-window.addEventListener("online", function () { renderStatus(); poll(); loadWeather(); });
+window.addEventListener("online", function () { renderStatus(); poll(); });
 window.addEventListener("offline", renderStatus);
-document.addEventListener("visibilitychange", function () { if (document.visibilityState === "visible") { if (unlocked) wake(); poll(); loadWeather(); } });
+document.addEventListener("visibilitychange", function () { if (document.visibilityState === "visible") { if (unlocked) wake(); poll(); } });
 
 // ---------- Skærmvagt: let pixel-skift ----------
 function shift() { var x = Math.round(Math.random() * 8 - 4), y = Math.round(Math.random() * 6 - 3); $("wrap").style.transform = "translate(" + x + "px," + y + "px)"; }
@@ -542,7 +649,7 @@ function hardReload(reason) {
   if (window.console) console.log("genindlæser:", reason);
   location.reload();
 }
-function refreshAll() { renderPlan(); renderCountdown(); renderQuote(); renderTrash(); loadData(); loadWeather(); poll(); pickVoice(); if (unlocked) { ensureAudio(); if (!lock || lock.released) wake(); } }
+function refreshAll() { renderPlan(); renderCountdown(); renderQuote(); renderTrash(); loadData(); poll(); pickVoice(); if (unlocked) { ensureAudio(); if (!lock || lock.released) wake(); } }
 function hourly() {
   if ("reload" in params) return hardReload("time");
   // genindlæs kun hvis en ny version er udgivet, så lyd og wake lock bevares
@@ -565,11 +672,10 @@ setInterval(function () {
 // ---------- Start ----------
 tickClock(); setInterval(tickClock, 1000);
 renderPlan(); renderCountdown(); renderQuote(); renderTrash(); renderStatus();
-loadData(); loadWeather(); poll();
-setInterval(loadWeather, 15 * 60e3);
+loadData(); poll();
 setInterval(renderPlan, 5 * 60e3);
 setInterval(shift, 2 * 60e3);
-window.__vaeg = { version: VERSION, refreshAll: refreshAll, hardReload: hardReload, upcoming: upcoming, isoWeek: isoWeek, state: function () { return { unlocked: unlocked, audio: actx ? actx.state : "none", feedOk: feedOk, weatherOk: weatherOk, alerts: document.querySelectorAll(".al").length }; } };
+window.__vaeg = { version: VERSION, refreshAll: refreshAll, hardReload: hardReload, upcoming: upcoming, isoWeek: isoWeek, state: function () { return { unlocked: unlocked, audio: actx ? actx.state : "none", feedOk: feedOk, alerts: document.querySelectorAll(".al").length }; } };
 })();
 </script>
 </body>

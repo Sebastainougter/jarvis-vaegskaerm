@@ -1,1148 +1,576 @@
-<!doctype html><html lang="da"><head><meta charset="utf-8">
+<!doctype html>
+<html lang="da">
+<head>
+<meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="theme-color" content="#000306">
+<meta name="theme-color" content="#05080d">
 <title>Vægskærm</title>
+<link rel="icon" href="data:,">
 <style>
-html,body{margin:0;background:#000306;color:#bff6ff;font-family:ui-monospace,Menlo,Consolas,monospace;height:100%;overflow:hidden;-webkit-user-select:none;user-select:none}
-#stage{position:fixed;inset:0;overflow:hidden}
-#cv{display:block;position:absolute;inset:0}
-.pan{position:absolute;z-index:2;box-sizing:border-box;background:rgba(0,30,46,.42);border:1px solid rgba(0,229,255,.3);clip-path:polygon(12px 0,100% 0,100% calc(100% - 12px),calc(100% - 12px) 100%,0 100%,0 12px);padding:12px 14px;overflow:hidden}
-.pan h2{margin:0 0 10px;font-size:10px;letter-spacing:.14em;font-weight:600;color:rgba(0,229,255,.7)}
-.pan h2::before{content:"";display:inline-block;width:28px;height:3px;background:#00e5ff;vertical-align:middle;margin-right:8px}
-#today{left:22px;top:22px;width:min(300px,24vw)}
-#alerts{right:22px;top:22px;width:min(360px,28vw);max-height:calc(100vh - 22px - var(--bottom,200px))}
-.kv{margin:0 0 10px}
-.kv .k{font-size:10px;color:rgba(0,229,255,.55);letter-spacing:.08em;text-transform:uppercase}
-.kv .v{font-size:clamp(13px,1.25vw,17px);color:#dffcff;margin-top:2px;line-height:1.35}
-.al{border-left:2px solid rgba(0,229,255,.6);padding:6px 0 6px 10px;margin:0 0 8px;transition:background .6s}
-.al .m{font-size:10px;color:rgba(0,229,255,.6);letter-spacing:.06em;text-transform:uppercase;display:flex;gap:8px;flex-wrap:wrap}
-.al .t{font-size:clamp(13px,1.15vw,16px);color:#dffcff;margin-top:3px;line-height:1.35}
-.al.hi{border-left-color:#ff6a3d;background:rgba(255,90,50,.08)}
-.al.hi .m{color:#ffb040}
-.al.new{background:rgba(0,229,255,.14)}
-.al.hi.new{background:rgba(255,120,50,.22)}
-#feed{position:absolute;z-index:3;left:50%;transform:translateX(-50%);top:calc(12px + env(safe-area-inset-top));font-size:10px;letter-spacing:.1em;color:rgba(0,229,255,.7);display:flex;gap:14px;align-items:center;white-space:nowrap}
-.dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:#50ffaa;margin-right:6px;vertical-align:middle;box-shadow:0 0 8px #50ffaa}
-.dot.off{background:#ff5a4a;box-shadow:0 0 8px #ff5a4a;animation:bl 1s infinite}
-@keyframes bl{50%{opacity:.3}}
-#unlock{position:fixed;inset:0;z-index:10;display:flex;align-items:center;justify-content:center;background:rgba(0,3,6,.72);cursor:pointer;-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px)}
-#unlock div{border:1px solid rgba(0,229,255,.6);padding:22px 34px;color:#dffcff;font-size:clamp(16px,2vw,24px);letter-spacing:.06em;background:rgba(0,40,60,.6);text-align:center}
-#unlock small{display:block;margin-top:8px;font-size:12px;color:rgba(0,229,255,.7)}
-.empty{font-size:12px;color:rgba(0,229,255,.45)}
-@media (max-aspect-ratio:1/1){#today{width:calc(50% - 30px);left:14px;top:40px}#alerts{width:calc(50% - 30px);right:14px;top:40px;bottom:auto;max-height:34vh}}
-</style></head><body>
-<div id="stage"><canvas id="cv"></canvas>
-<div id="feed"><span><span class="dot" id="fdot"></span><span id="ftxt">FORBINDER…</span></span><span id="wl"></span></div>
-<div class="pan" id="today"><h2>I DAG</h2><div id="todayList"></div></div>
-<div class="pan" id="alerts"><h2>SENESTE BESKEDER</h2><div id="alertList"></div></div>
+:root{--bg:#05080d;--pan:#0c131c;--line:#1c2a38;--txt:#f2f7fb;--dim:#93a6b8;--acc:#36d7ff;--warm:#ffb547;--hot:#ff5d4a;--ok:#4ef0a0}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--txt);font-family:-apple-system,"SF Pro Display","Helvetica Neue",Helvetica,Arial,sans-serif;overflow:hidden;-webkit-user-select:none;user-select:none;-webkit-font-smoothing:antialiased}
+#wrap{position:fixed;top:0;left:0;right:0;bottom:0;padding:16px 18px 10px;display:-webkit-box;display:flex;-webkit-box-orient:vertical;flex-direction:column;transition:transform 2s,opacity 3s}
+#wrap.night{opacity:.62}
+.grid{-webkit-box-flex:1;flex:1;display:grid;grid-template-columns:1.25fr 1fr 1fr;grid-template-rows:168px 158px minmax(0,1fr);grid-gap:12px;gap:12px;min-height:0}
+.pan{background:var(--pan);border:1px solid var(--line);border-radius:18px;padding:14px 18px;overflow:hidden;min-height:0;position:relative}
+.pan h2{margin:0 0 6px;font-size:15px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--acc)}
+.span2{grid-column:span 2}
+/* ur */
+#clockPan{display:-webkit-box;display:flex;-webkit-box-align:center;align-items:center;justify-content:space-between}
+#clock{font-size:132px;line-height:.95;font-weight:200;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+#clock .s{font-size:46px;color:var(--dim);font-weight:300;margin-left:6px}
+#dateBox{text-align:right}
+#wday{font-size:38px;font-weight:600;text-transform:capitalize}
+#date{font-size:27px;color:var(--dim);margin-top:4px}
+#week{display:inline-block;margin-top:8px;font-size:22px;font-weight:700;color:var(--bg);background:var(--acc);border-radius:10px;padding:4px 12px}
+/* vejr nu */
+#days{margin-top:6px;border-top:1px solid var(--line);padding-top:2px}
+#sun{font-size:20px;color:var(--dim);margin-top:8px}
+#sun b{color:var(--txt)}
+#nowPan .row{display:-webkit-box;display:flex;-webkit-box-align:center;align-items:center}
+#nowIcon{font-size:54px;line-height:1;margin-right:14px}
+#nowTemp{font-size:60px;font-weight:300;line-height:1}
+#nowDesc{font-size:21px;font-weight:600;margin-top:2px}
+#nowMeta{font-size:17px;color:var(--dim);margin-top:6px;line-height:1.4}
+#nowMeta b{color:var(--txt);font-weight:600}
+/* timer */
+#hours{display:-webkit-box;display:flex;justify-content:space-between}
+.hr{text-align:center;-webkit-box-flex:1;flex:1}
+.hr .t{font-size:18px;color:var(--dim)}
+.hr .i{font-size:34px;line-height:1.25}
+.hr .v{font-size:26px;font-weight:600}
+.hr .p{font-size:16px;color:var(--acc);min-height:20px}
+/* 5 dage */
+.day{display:-webkit-box;display:flex;-webkit-box-align:center;align-items:center;font-size:19px;padding:1px 0;border-bottom:1px solid var(--line)}
+.day:last-child{border-bottom:0}
+.day .n{width:52px;font-weight:700;text-transform:capitalize}
+.day .i{width:40px;font-size:22px;text-align:center}
+.day .hl{-webkit-box-flex:1;flex:1;text-align:right;font-variant-numeric:tabular-nums}
+.day .hl span{color:var(--dim)}
+.day .r{width:78px;text-align:right;color:var(--acc);font-size:17px}
+/* lister */
+.item{display:-webkit-box;display:flex;-webkit-box-align:baseline;align-items:baseline;font-size:21px;line-height:1.25;padding:4px 0}
+.item small{color:var(--dim);font-size:16px;margin-left:6px}
+.item .tm{min-width:70px;font-weight:700;color:var(--warm);font-variant-numeric:tabular-nums}
+.item.done{opacity:.38}
+.item.done .tm{text-decoration:line-through}
+.sub{font-size:15px;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);margin:10px 0 2px}
+.cd{display:-webkit-box;display:flex;-webkit-box-align:center;align-items:center;font-size:20px;padding:4px 0;border-bottom:1px solid var(--line)}
+.cd:last-child{border-bottom:0}
+.cd .ic{width:40px;font-size:26px}
+.cd .nm{-webkit-box-flex:1;flex:1;line-height:1.2;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cd .nm small{display:block;font-size:16px;color:var(--dim)}
+.cd .dd{font-size:28px;font-weight:700;color:var(--acc);text-align:right;min-width:70px;font-variant-numeric:tabular-nums}
+.cd .dd small{display:block;font-size:12px;font-weight:600;color:var(--dim);letter-spacing:.08em;text-transform:uppercase}
+.cd.today .dd{color:var(--warm)}
+#trash{margin-top:10px;padding-top:8px;border-top:1px solid var(--line)}
+#trash .big{font-size:22px;font-weight:700}
+#trash .big .when{color:var(--warm)}
+#trash .ty{font-size:18px;color:var(--dim);margin-top:2px}
+/* beskeder */
+.al{border-left:4px solid var(--acc);padding:6px 0 6px 12px;margin:0 0 9px;border-radius:2px}
+.al .m{font-size:14px;color:var(--dim);letter-spacing:.06em;text-transform:uppercase}
+.al .t{font-size:21px;line-height:1.3;margin-top:2px}
+.al.hi{border-left-color:var(--hot);background:rgba(255,93,74,.08)}
+.al.hi .m{color:var(--hot)}
+.al.new{background:rgba(54,215,255,.16)}
+.empty{font-size:20px;color:var(--dim)}
+.okbig{font-size:22px;color:var(--ok);font-weight:600}
+/* bund */
+#foot{display:-webkit-box;display:flex;-webkit-box-align:center;align-items:center;margin-top:10px;min-height:56px}
+#quote{-webkit-box-flex:1;flex:1;font-size:21px;line-height:1.3;font-style:italic;color:#d6e2ec;padding-right:18px}
+#quote b{font-style:normal;font-weight:600;color:var(--dim);font-size:17px;white-space:nowrap}
+#status{font-size:16px;color:var(--dim);text-align:right;line-height:1.5;white-space:nowrap}
+.dot{display:inline-block;width:11px;height:11px;border-radius:50%;background:var(--ok);margin-right:6px;vertical-align:middle;box-shadow:0 0 8px var(--ok)}
+.dot.off{background:var(--hot);box-shadow:0 0 8px var(--hot)}
+.dot.warn{background:var(--warm);box-shadow:0 0 8px var(--warm)}
+/* alarm-banner */
+#banner{position:fixed;left:24px;right:24px;top:20px;z-index:8;background:#0d2735;border:2px solid var(--acc);border-radius:20px;padding:20px 28px;font-size:38px;line-height:1.25;font-weight:600;display:none;box-shadow:0 10px 60px rgba(0,0,0,.7)}
+#banner.hi{background:#3a1410;border-color:var(--hot)}
+#banner .m{font-size:17px;letter-spacing:.14em;text-transform:uppercase;color:var(--acc);margin-bottom:6px}
+#banner.hi .m{color:var(--hot)}
+#unlock{position:fixed;top:0;left:0;right:0;bottom:0;z-index:10;display:-webkit-box;display:flex;-webkit-box-align:center;align-items:center;-webkit-box-pack:center;justify-content:center;background:rgba(3,5,8,.78);cursor:pointer}
+#unlock div{border:2px solid var(--acc);border-radius:20px;padding:28px 44px;font-size:32px;font-weight:600;background:#0c1a24;text-align:center}
+#unlock small{display:block;margin-top:10px;font-size:18px;color:var(--dim);font-weight:400}
+#hint{position:fixed;z-index:9;right:22px;bottom:74px;display:none;background:#0c1a24;color:var(--txt);border:1px solid var(--acc);border-radius:10px;padding:8px 14px;font:600 16px -apple-system,Helvetica,Arial,sans-serif;cursor:pointer}
+</style>
+</head>
+<body>
+<div id="wrap">
+  <div class="grid">
+    <div class="pan span2" id="clockPan">
+      <div id="clock">--:--</div>
+      <div id="dateBox"><div id="wday"></div><div id="date"></div><div><span id="week"></span></div><div id="sun"></div></div>
+    </div>
+    <div class="pan" id="nowPan" style="grid-row:span 2">
+      <h2>Vejret i Køge</h2>
+      <div class="row"><div id="nowIcon">·</div><div><div id="nowTemp">--°</div><div id="nowDesc">Henter vejr…</div></div></div>
+      <div id="nowMeta"></div>
+      <div id="days"></div>
+    </div>
+    <div class="pan span2"><h2>De næste timer</h2><div id="hours"></div></div>
+    <div class="pan"><h2>I dag</h2><div id="plan"></div><div id="trash"></div></div>
+    <div class="pan"><h2>Nedtælling</h2><div id="countdown"></div></div>
+    <div class="pan" id="alerts"><h2>Beskeder</h2><div id="alertList"><div class="empty">Henter…</div></div></div>
+  </div>
+  <div id="foot"><div id="quote"></div><div id="status"></div></div>
 </div>
+<div id="banner"><div class="m" id="bannerMeta"></div><div id="bannerText"></div></div>
+<button id="hint">🔇 Tryk for lyd</button>
 <div id="unlock"><div>Tryk for at aktivere lyd<small>og holde skærmen tændt</small></div></div>
 <script>
-function sylCount(w) {
-  const m = w.toLowerCase().match(/[aeiouyæøåéäöü]+/g);
-  return Math.max(1, m ? m.length : 1);
-}
-function buildTimeline(text, rate) {
-  const words = [];
-  const re = /\S+/g;
-  let m;
-  let t = 0.15;
-  while ((m = re.exec(text)) !== null) {
-    const w = m[0];
-    const syl = sylCount(w);
-    const dur = (0.07 + syl * 0.2) / rate;
-    let pause = 0.04 / rate;
-    if (/[,;:]$/.test(w)) pause = 0.28 / rate;
-    if (/[.!?]$/.test(w)) pause = 0.5 / rate;
-    words.push({ s: m.index, e: m.index + w.length, t0: t, dur, syl, pause });
-    t += dur + pause;
-  }
-  return { words, total: t };
-}
-function startHolo(cv, wrap, setStatus, opts = {}) {
-  const decor = opts.decor !== false;
-  let hot = 0, hotTarget = 0;
-  const ctx0 = cv.getContext("2d");
-  if (!ctx0) {
-    return { setWeather: () => {
-    }, speak: () => {
-    }, stop: () => {
-    }, destroy: () => {
-    }, mode: () => "ingen" };
-  }
-  const ctx = ctx0;
-  let W = 300, H = 300, DPR = 1;
-  let raf = 0;
-  let alive = true;
-  const mouse = { x: 0, y: 0, tx: 0, ty: 0 };
-  const rnd = (a, b) => a + Math.random() * (b - a);
-  let text = "";
-  let words = [];
-  let total = 0;
-  let speaking = false;
-  let tStart = 0;
-  let clockOffset = 0;
-  let audioLive = false;
-  let typed = 0;
-  let subFade = 0;
-  let lastEnd = 0;
-  let doneCb = null;
-  let watchdog = 0;
-  let amp = 0;
-  let flare = 0;
-  let spin = 0;
-  let curWord = -1;
-  const NB = 120;
-  const bins = new Float32Array(NB);
-  const binPh = Array.from({ length: NB }, () => rnd(0, Math.PI * 2));
-  const binF = Array.from({ length: NB }, () => rnd(3, 11));
-  const load = Array.from({ length: 48 }, () => rnd(0.25, 0.55));
-  let loadT = 0;
-  let weather = null;
-  const rings = [
-    { r: 0.3, w: 1.2, sp: 0.35, kind: 0, seg: 72, gap: 0.5, a: 0.55, z: 0.9 },
-    { r: 0.38, w: 3, sp: -0.22, kind: 1, seg: 3, gap: 0.35, a: 0.85, z: 0.8 },
-    { r: 0.47, w: 1, sp: 0.12, kind: 2, seg: 180, gap: 0, a: 0.5, z: 0.7 },
-    { r: 0.62, w: 6, sp: 0.08, kind: 1, seg: 5, gap: 0.55, a: 0.35, z: 0.55 },
-    { r: 0.7, w: 1.4, sp: -0.15, kind: 3, seg: 1, gap: 0, a: 0.6, z: 0.5 },
-    { r: 0.78, w: 2, sp: 0.05, kind: 0, seg: 120, gap: 0.6, a: 0.35, z: 0.4 },
-    { r: 0.88, w: 1, sp: -0.04, kind: 2, seg: 60, gap: 0, a: 0.45, z: 0.3 },
-    { r: 0.97, w: 10, sp: 0.03, kind: 1, seg: 2, gap: 0.8, a: 0.12, z: 0.2 }
-  ];
-  const ringAng = rings.map(() => rnd(0, Math.PI * 2));
-  let parts = [];
-  function resize() {
-    const r = wrap.getBoundingClientRect();
-    W = Math.max(200, r.width);
-    H = Math.max(200, r.height);
-    DPR = Math.min(2, window.devicePixelRatio || 1);
-    cv.width = Math.round(W * DPR);
-    cv.height = Math.round(H * DPR);
-    cv.style.width = W + "px";
-    cv.style.height = H + "px";
-    const n = Math.round(Math.min(180, W * H / 6e3));
-    parts = Array.from({ length: n }, () => ({
-      x: rnd(0, W),
-      y: rnd(0, H),
-      z: rnd(0.2, 1),
-      vx: rnd(-4, 4),
-      vy: rnd(-14, -3),
-      ph: rnd(0, 6.28)
-    }));
-  }
-  resize();
-  const ro = new ResizeObserver(() => resize());
-  ro.observe(wrap);
-  function onMove(e) {
-    const r = wrap.getBoundingClientRect();
-    mouse.tx = ((e.clientX - r.left) / r.width - 0.5) * 2;
-    mouse.ty = ((e.clientY - r.top) / r.height - 0.5) * 2;
-  }
-  function onLeave() {
-    mouse.tx = 0;
-    mouse.ty = 0;
-  }
-  wrap.addEventListener("pointermove", onMove);
-  wrap.addEventListener("pointerleave", onLeave);
-  let CY = "0,229,255";
-  let BL = "64,156,255";
-  const mixC = (a, b, k) => a.map((v, i) => Math.round(v + (b[i] - v) * k)).join(",");
-  const col = (c, a) => "rgba(" + c + "," + Math.max(0, Math.min(1, a)).toFixed(3) + ")";
-  function nowS() {
-    return performance.now() / 1e3;
-  }
-  function progress() {
-    return nowS() - tStart + clockOffset;
-  }
-  function finish() {
-    if (!speaking) return;
-    speaking = false;
-    audioLive = false;
-    lastEnd = nowS();
-    typed = text.length;
-    window.clearTimeout(watchdog);
-    setStatus("STANDBY");
-    const cb = doneCb;
-    doneCb = null;
-    if (cb) cb();
-  }
-  function stop() {
-    try {
-      if (window.speechSynthesis) window.speechSynthesis.cancel();
-    } catch (_e) {
-    }
-    finish();
-  }
-  function speak(t, voice, mute, onDone, hi) {
-    stop();
-    hotTarget = hi ? 1 : 0;
-    text = t.trim();
-    if (!text) return;
-    const rate = 0.98;
-    const tl = buildTimeline(text, rate);
-    words = tl.words;
-    total = tl.total;
-    typed = 0;
-    curWord = -1;
-    clockOffset = 0;
-    tStart = nowS();
-    speaking = true;
-    audioLive = false;
-    flare = 1;
-    doneCb = onDone;
-    const synth = typeof window !== "undefined" ? window.speechSynthesis : void 0;
-    const canTTS = !!synth && typeof SpeechSynthesisUtterance !== "undefined" && !mute;
-    if (!canTTS) {
-      setStatus(mute ? "LYDL\xD8S" : "SIMULERET");
-      return;
-    }
-    try {
-      const u = new SpeechSynthesisUtterance(text);
-      if (voice) {
-        u.voice = voice;
-        u.lang = voice.lang;
-      } else {
-        u.lang = "da-DK";
-      }
-      u.rate = rate;
-      u.pitch = 0.92;
-      u.onstart = () => {
-        audioLive = true;
-        tStart = nowS();
-        clockOffset = 0;
-        setStatus("TALER");
-      };
-      u.onboundary = (ev) => {
-        if (ev.name && ev.name !== "word") return;
-        audioLive = true;
-        const ci = ev.charIndex;
-        for (let i = 0; i < words.length; i++) {
-          if (ci >= words[i].s && ci < words[i].e + 1) {
-            clockOffset = words[i].t0 - (nowS() - tStart);
-            flare = Math.max(flare, 0.35);
-            break;
-          }
-        }
-      };
-      u.onend = () => finish();
-      u.onerror = () => {
-        if (!audioLive) {
-          setStatus("SIMULERET");
-        } else {
-          finish();
-        }
-      };
-      synth.cancel();
-      synth.speak(u);
-      if (synth.paused) synth.resume();
-      watchdog = window.setTimeout(() => {
-        if (speaking && !audioLive) setStatus("SIMULERET");
-      }, 1800);
-    } catch (_e) {
-      setStatus("SIMULERET");
-    }
-  }
-  function updateSpeech(dt, time) {
-    if (!speaking) {
-      return 0.07 + 0.05 * Math.sin(time * 0.9) + 0.02 * Math.sin(time * 2.3);
-    }
-    const p = progress();
-    let target = 0.12;
-    let endChar = 0;
-    let found = -1;
-    for (let i = 0; i < words.length; i++) {
-      const w = words[i];
-      if (p >= w.t0) {
-        endChar = w.e;
-        found = i;
-      }
-      if (p >= w.t0 && p < w.t0 + w.dur) {
-        const ph = (p - w.t0) / w.dur;
-        const sp = ph * w.syl;
-        const local = sp - Math.floor(sp);
-        const env = Math.pow(Math.abs(Math.sin(Math.PI * local)), 0.6);
-        target = 0.35 + 0.6 * env * (0.8 + 0.2 * Math.sin(time * 37 + i));
-      }
-    }
-    if (found !== curWord) {
-      curWord = found;
-    }
-    if (p > total) {
-      if (audioLive) {
-        target = 0.3 + 0.35 * Math.abs(Math.sin(time * 11));
-        endChar = text.length;
-      } else if (p > total + 0.2) {
-        finish();
-      }
-    }
-    const goal = Math.max(endChar, 0);
-    const speed = goal - typed > 12 ? 90 : 38;
-    typed = Math.min(goal, typed + speed * dt);
-    return target;
-  }
-  let last = nowS();
-  function frame() {
-    if (!alive) return;
-    const time = nowS();
-    const dt = Math.min(0.05, time - last);
-    last = time;
-    const tgt = updateSpeech(dt, time);
-    amp += (tgt - amp) * Math.min(1, dt * (tgt > amp ? 22 : 9));
-    flare = Math.max(0, flare - dt * 1.4);
-    const talk = speaking ? 1 : 0;
-    spin += dt * (1 + amp * 3.2 + flare * 2);
-    mouse.x += (mouse.tx - mouse.x) * Math.min(1, dt * 3);
-    mouse.y += (mouse.ty - mouse.y) * Math.min(1, dt * 3);
-    for (let i = 0; i < NB; i++) {
-      const sym = Math.abs(i / NB * 2 - 1);
-      const v = (0.5 + 0.5 * Math.sin(time * binF[i] + binPh[i])) * (0.55 + 0.45 * Math.sin(time * 1.7 + sym * 6));
-      const tv = amp * v * (0.6 + 0.4 * (1 - sym * 0.5));
-      bins[i] += (tv - bins[i]) * Math.min(1, dt * 18);
-    }
-    loadT += dt;
-    if (loadT > 0.25) {
-      loadT = 0;
-      load.shift();
-      const prev = load[load.length - 1];
-      load.push(Math.max(0.08, Math.min(0.95, prev + rnd(-0.12, 0.12) + (talk ? 0.06 : -0.03))));
-    }
-    if (!speaking && time - lastEnd > 6) hotTarget = 0;
-    hot += (hotTarget - hot) * Math.min(1, dt * 2.5);
-    CY = mixC([0, 229, 255], [255, 176, 64], hot);
-    BL = mixC([64, 156, 255], [255, 80, 60], hot);
-    if (!speaking && time - lastEnd > 5) subFade = Math.max(0, subFade - dt * 0.8);
-    else subFade = Math.min(1, subFade + dt * 4);
-    draw(time);
-    raf = requestAnimationFrame(frame);
-  }
-  function draw(time) {
-    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
-    ctx.globalCompositeOperation = "source-over";
-    const portrait = H > W * 1.1;
-    const cx = W / 2 + mouse.x * 10;
-    const avail = H - barH(portrait) - 20;
-    const cy = (portrait ? avail * 0.45 : avail * 0.44) + mouse.y * 8;
-    const R = Math.min(W * (portrait ? 0.46 : 0.4), avail * (portrait ? 0.33 : 0.38));
-    const bg = ctx.createRadialGradient(cx, cy, 0, cx, cy, Math.max(W, H) * 0.8);
-    bg.addColorStop(0, "#04202e");
-    bg.addColorStop(0.45, "#020b14");
-    bg.addColorStop(1, "#000306");
-    ctx.fillStyle = bg;
-    ctx.fillRect(0, 0, W, H);
-    ctx.save();
-    ctx.globalCompositeOperation = "lighter";
-    const hz = cy + R * 0.95;
-    ctx.lineWidth = 1;
-    for (let i = 0; i < 14; i++) {
-      const k = Math.pow(i / 13, 2);
-      const y = hz + k * (H - hz + 40);
-      ctx.strokeStyle = col(BL, 0.05 + 0.06 * (i / 13));
-      ctx.beginPath();
-      ctx.moveTo(0, y);
-      ctx.lineTo(W, y);
-      ctx.stroke();
-    }
-    const vx = cx - mouse.x * 40;
-    for (let i = -16; i <= 16; i++) {
-      ctx.strokeStyle = col(BL, 0.07);
-      ctx.beginPath();
-      ctx.moveTo(vx + i * 8, hz);
-      ctx.lineTo(vx + i * W * 0.12, H + 40);
-      ctx.stroke();
-    }
-    const gs = 44;
-    ctx.strokeStyle = col(CY, 0.03);
-    const ox = mouse.x * -6 % gs, oy = mouse.y * -6 % gs;
-    ctx.beginPath();
-    for (let x = ox; x < W; x += gs) {
-      ctx.moveTo(x, 0);
-      ctx.lineTo(x, hz);
-    }
-    for (let y = oy; y < hz; y += gs) {
-      ctx.moveTo(0, y);
-      ctx.lineTo(W, y);
-    }
-    ctx.stroke();
-    ctx.restore();
-    ctx.save();
-    ctx.globalCompositeOperation = "lighter";
-    const dt = 1 / 60;
-    for (const p of parts) {
-      p.x += p.vx * dt * (1 + amp * 2);
-      p.y += p.vy * dt * (1 + amp * 2);
-      if (p.y < -10) {
-        p.y = H + 10;
-        p.x = rnd(0, W);
-      }
-      if (p.x < -10) p.x = W + 10;
-      if (p.x > W + 10) p.x = -10;
-      const tw = 0.5 + 0.5 * Math.sin(time * 2 + p.ph);
-      const px = p.x - mouse.x * 30 * p.z, py = p.y - mouse.y * 20 * p.z;
-      ctx.fillStyle = col(CY, 0.12 + 0.4 * tw * p.z);
-      const s = 0.6 + p.z * 1.6;
-      ctx.fillRect(px, py, s, s);
-    }
-    ctx.restore();
-    ctx.save();
-    ctx.globalCompositeOperation = "lighter";
-    const halo = ctx.createRadialGradient(cx, cy, R * 0.05, cx, cy, R * (1.25 + amp * 0.3));
-    halo.addColorStop(0, col(CY, 0.28 + amp * 0.35));
-    halo.addColorStop(0.25, col(BL, 0.12 + amp * 0.12));
-    halo.addColorStop(1, col(BL, 0));
-    ctx.fillStyle = halo;
-    ctx.beginPath();
-    ctx.arc(cx, cy, R * 1.6, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.restore();
-    const tiltX = mouse.y * 0.22, tiltY = mouse.x * 0.22;
-    ctx.save();
-    ctx.globalCompositeOperation = "lighter";
-    ctx.lineCap = "butt";
-    for (let ri = 0; ri < rings.length; ri++) {
-      const rg = rings[ri];
-      const par = 1 - rg.z;
-      const rx = cx + mouse.x * 26 * par, ry = cy + mouse.y * 18 * par;
-      ctx.setTransform(DPR * Math.cos(tiltY), DPR * Math.sin(tiltY) * tiltX * 0.6, DPR * -Math.sin(tiltX) * tiltY * 0.6, DPR * Math.cos(tiltX), DPR * rx, DPR * ry);
-      ringAng[ri] += rg.sp * (1 / 60) * (1 + amp * 3 + flare * 3) * (ri % 2 ? 1.3 : 1);
-      const ang = ringAng[ri];
-      const r = R * rg.r * (1 + flare * 0.04 * (ri % 3));
-      const a = rg.a * (0.75 + amp * 0.6 + flare * 0.5);
-      drawRing(rg, r, ang, a, time, ri);
-    }
-    ctx.setTransform(DPR * Math.cos(tiltY), 0, 0, DPR * Math.cos(tiltX), DPR * cx, DPR * cy);
-    const r0 = R * 0.205;
-    for (let i = 0; i < NB; i++) {
-      const th = i / NB * Math.PI * 2 - Math.PI / 2 + spin * 0.05;
-      const v = bins[i];
-      const len = R * (0.012 + v * 0.085);
-      const c = Math.cos(th), s = Math.sin(th);
-      ctx.strokeStyle = col(CY, 0.35 + v * 1.1);
-      ctx.lineWidth = Math.max(1, Math.PI * 2 * r0 / NB * 0.55);
-      ctx.beginPath();
-      ctx.moveTo(c * r0, s * r0);
-      ctx.lineTo(c * (r0 + len), s * (r0 + len));
-      ctx.stroke();
-      ctx.strokeStyle = col(BL, 0.15 + v * 0.6);
-      ctx.beginPath();
-      ctx.moveTo(c * (r0 - 3), s * (r0 - 3));
-      ctx.lineTo(c * (r0 - 3 - len * 0.35), s * (r0 - 3 - len * 0.35));
-      ctx.stroke();
-    }
-    const cr = R * (0.12 + amp * 0.035 + 6e-3 * Math.sin(time * 1.3));
-    const core = ctx.createRadialGradient(0, 0, 0, 0, 0, cr * 1.6);
-    core.addColorStop(0, "rgba(235,255,255," + (0.85 + amp * 0.15).toFixed(3) + ")");
-    core.addColorStop(0.25, col(CY, 0.75 + amp * 0.25));
-    core.addColorStop(0.6, col(BL, 0.25 + amp * 0.3));
-    core.addColorStop(1, col(BL, 0));
-    ctx.fillStyle = core;
-    ctx.beginPath();
-    ctx.arc(0, 0, cr * 1.6, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.strokeStyle = col(CY, 0.35 + amp * 0.4);
-    ctx.lineWidth = 1;
-    for (let k = 0; k < 2; k++) {
-      ctx.beginPath();
-      const hr = cr * (0.75 + k * 0.38);
-      for (let i = 0; i <= 6; i++) {
-        const th = i / 6 * Math.PI * 2 + spin * (k ? -0.3 : 0.4);
-        const x = Math.cos(th) * hr, y = Math.sin(th) * hr;
-        if (i === 0) ctx.moveTo(x, y);
-        else ctx.lineTo(x, y);
-      }
-      ctx.stroke();
-    }
-    ctx.strokeStyle = col("220,255,255", 0.5 + amp * 0.5);
-    ctx.lineWidth = 1.4;
-    ctx.beginPath();
-    for (let i = 0; i <= 40; i++) {
-      const x = -cr + i / 40 * cr * 2;
-      const env = Math.sin(i / 40 * Math.PI);
-      const y = Math.sin(i * 0.9 + time * 14) * env * cr * 0.55 * amp + Math.sin(i * 0.37 - time * 6) * env * cr * 0.12 * amp;
-      if (i === 0) ctx.moveTo(x, y);
-      else ctx.lineTo(x, y);
-    }
-    ctx.stroke();
-    if (flare > 0.01) {
-      ctx.strokeStyle = col(CY, flare * 0.6);
-      ctx.lineWidth = 2 + flare * 4;
-      ctx.beginPath();
-      ctx.arc(0, 0, R * (1.05 - flare * 0.6), 0, Math.PI * 2);
-      ctx.stroke();
-    }
-    ctx.restore();
-    drawHud(time, portrait, cx, cy, R);
-    drawSubs(time, portrait);
-    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
-    ctx.globalCompositeOperation = "source-over";
-    ctx.fillStyle = "rgba(0,0,0,0.16)";
-    for (let y = 0; y < H; y += 3) ctx.fillRect(0, y, W, 1);
-    const sy = time * 60 % (H + 200) - 100;
-    const sg = ctx.createLinearGradient(0, sy - 60, 0, sy + 60);
-    sg.addColorStop(0, "rgba(0,229,255,0)");
-    sg.addColorStop(0.5, "rgba(0,229,255,0.035)");
-    sg.addColorStop(1, "rgba(0,229,255,0)");
-    ctx.fillStyle = sg;
-    ctx.fillRect(0, sy - 60, W, 120);
-    const vg = ctx.createRadialGradient(W / 2, H / 2, Math.min(W, H) * 0.35, W / 2, H / 2, Math.max(W, H) * 0.75);
-    vg.addColorStop(0, "rgba(0,0,0,0)");
-    vg.addColorStop(1, "rgba(0,0,0,0.65)");
-    ctx.fillStyle = vg;
-    ctx.fillRect(0, 0, W, H);
-  }
-  function glowStroke(w, a, path) {
-    ctx.lineWidth = w * 3.5;
-    ctx.strokeStyle = col(BL, a * 0.18);
-    ctx.beginPath();
-    path();
-    ctx.stroke();
-    ctx.lineWidth = w;
-    ctx.strokeStyle = col(CY, a);
-    ctx.beginPath();
-    path();
-    ctx.stroke();
-  }
-  function drawRing(rg, r, ang, a, time, ri) {
-    const TAU = Math.PI * 2;
-    if (rg.kind === 0) {
-      const step = TAU / rg.seg;
-      glowStroke(rg.w, a, () => {
-        for (let i = 0; i < rg.seg; i++) {
-          const s0 = ang + i * step;
-          ctx.moveTo(Math.cos(s0) * r, Math.sin(s0) * r);
-          ctx.arc(0, 0, r, s0, s0 + step * (1 - rg.gap));
-        }
-      });
-    } else if (rg.kind === 1) {
-      const step = TAU / rg.seg;
-      glowStroke(rg.w, a, () => {
-        for (let i = 0; i < rg.seg; i++) {
-          const s0 = ang + i * step;
-          ctx.moveTo(Math.cos(s0) * r, Math.sin(s0) * r);
-          ctx.arc(0, 0, r, s0, s0 + step * (1 - rg.gap));
-        }
-      });
-      ctx.fillStyle = col(CY, a);
-      for (let i = 0; i < rg.seg; i++) {
-        const s0 = ang + i * step;
-        ctx.beginPath();
-        ctx.arc(Math.cos(s0) * r, Math.sin(s0) * r, rg.w * 0.35 + 1.2, 0, TAU);
-        ctx.fill();
-      }
-    } else if (rg.kind === 2) {
-      ctx.lineWidth = 1;
-      for (let i = 0; i < rg.seg; i++) {
-        const th = ang + i / rg.seg * TAU;
-        const big = i % 5 === 0;
-        const l = big ? 9 : 4;
-        ctx.strokeStyle = col(CY, a * (big ? 1 : 0.55));
-        ctx.beginPath();
-        ctx.moveTo(Math.cos(th) * r, Math.sin(th) * r);
-        ctx.lineTo(Math.cos(th) * (r - l), Math.sin(th) * (r - l));
-        ctx.stroke();
-      }
-    } else {
-      glowStroke(rg.w, a * 0.5, () => {
-        ctx.arc(0, 0, r, 0, TAU);
-      });
-      const sweep = 0.9 + amp * 1.2;
-      glowStroke(rg.w * 2.2, a, () => {
-        ctx.arc(0, 0, r, ang, ang + sweep);
-      });
-      glowStroke(rg.w * 2.2, a, () => {
-        ctx.arc(0, 0, r, ang + Math.PI, ang + Math.PI + sweep * 0.6);
-      });
-      ctx.fillStyle = col(CY, a);
-      for (let i = 0; i < 4; i++) {
-        const th = -ang * 0.7 + i / 4 * TAU;
-        const x = Math.cos(th) * r, y = Math.sin(th) * r;
-        ctx.save();
-        ctx.translate(x, y);
-        ctx.rotate(th + Math.PI / 4);
-        ctx.fillRect(-3, -3, 6, 6);
-        ctx.restore();
-      }
-      ctx.font = "9px ui-monospace, Menlo, Consolas, monospace";
-      ctx.fillStyle = col(CY, a * 0.8);
-      for (let i = 0; i < 8; i++) {
-        const th = ang * 0.5 + i / 8 * TAU + 0.2;
-        ctx.save();
-        ctx.translate(Math.cos(th) * (r + 10), Math.sin(th) * (r + 10));
-        ctx.rotate(th + Math.PI / 2);
-        ctx.fillText(String((i * 45 + ri * 7) % 360).padStart(3, "0"), -8, 0);
-        ctx.restore();
-      }
-    }
-  }
-  const fmtTime = new Intl.DateTimeFormat("da-DK", { timeZone: "Europe/Copenhagen", hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false });
-  const fmtDateShort = new Intl.DateTimeFormat("da-DK", { timeZone: "Europe/Copenhagen", weekday: "short", day: "numeric", month: "short", year: "numeric" });
-  const fmtDate = new Intl.DateTimeFormat("da-DK", { timeZone: "Europe/Copenhagen", weekday: "long", day: "numeric", month: "long", year: "numeric" });
-  function panel(x, y, w, h, title) {
-    ctx.strokeStyle = col(CY, 0.35);
-    ctx.lineWidth = 1;
-    ctx.fillStyle = "rgba(0,40,60,0.28)";
-    const c = 10;
-    ctx.beginPath();
-    ctx.moveTo(x + c, y);
-    ctx.lineTo(x + w, y);
-    ctx.lineTo(x + w, y + h - c);
-    ctx.lineTo(x + w - c, y + h);
-    ctx.lineTo(x, y + h);
-    ctx.lineTo(x, y + c);
-    ctx.closePath();
-    ctx.fill();
-    ctx.stroke();
-    ctx.fillStyle = col(CY, 0.9);
-    ctx.fillRect(x + c, y - 1, Math.min(40, w * 0.3), 3);
-    ctx.font = "600 10px ui-monospace, Menlo, Consolas, monospace";
-    ctx.fillStyle = col(CY, 0.65);
-    ctx.fillText(title, x + 10, y + 16);
-  }
-  function barH(portrait) {
-    return portrait ? 84 : 62;
-  }
-  function drawHud(time, portrait, cx, cy, R) {
-    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
-    ctx.globalCompositeOperation = "source-over";
-    const mono = "ui-monospace, Menlo, Consolas, monospace";
-    const pad = portrait ? 10 : 22;
-    if (decor && !portrait && W > 760) {
-      const pw = Math.min(230, W * 0.2), ph = 104;
-      const rx = W - pad - pw, ry = pad + 10;
-      panel(rx, ry, pw, ph, "BELASTNING (DEKORATIV)");
-      const gx = rx + 10, gy = ry + 26, gw = pw - 20, gh = ph - 50;
-      ctx.strokeStyle = col(CY, 0.12);
-      ctx.lineWidth = 1;
-      ctx.beginPath();
-      for (let i = 0; i <= 4; i++) {
-        const yy = gy + gh * i / 4;
-        ctx.moveTo(gx, yy);
-        ctx.lineTo(gx + gw, yy);
-      }
-      ctx.stroke();
-      ctx.beginPath();
-      for (let i = 0; i < load.length; i++) {
-        const x = gx + i / (load.length - 1) * gw, y = gy + gh - load[i] * gh;
-        if (i === 0) ctx.moveTo(x, y);
-        else ctx.lineTo(x, y);
-      }
-      ctx.strokeStyle = col(CY, 0.95);
-      ctx.lineWidth = 1.4;
-      ctx.stroke();
-      ctx.lineTo(gx + gw, gy + gh);
-      ctx.lineTo(gx, gy + gh);
-      ctx.closePath();
-      ctx.fillStyle = col(CY, 0.1);
-      ctx.fill();
-      ctx.font = "10px " + mono;
-      ctx.fillStyle = col(CY, 0.75);
-      ctx.fillText("KERNE " + String(Math.round(load[load.length - 1] * 100)).padStart(2, "0") + " %", gx, ry + ph - 9);
-      const lx = pad, ly = pad + 10;
-      panel(lx, ly, pw, 34 * 4 + 30, "TELEMETRI");
-      const items = [
-        ["FREKVENS", (432 + amp * 180).toFixed(1) + " HZ"],
-        ["AMPLITUDE", (amp * 100).toFixed(0).padStart(2, "0") + " %"],
-        ["RINGHASTIGHED", (1 + amp * 3.2).toFixed(2) + " X"],
-        ["KERNETEMP", (36.4 + amp * 2.1).toFixed(1) + " \xB0"]
-      ];
-      for (let i = 0; i < items.length; i++) {
-        const yy = ly + 38 + i * 34;
-        ctx.font = "10px " + mono;
-        ctx.fillStyle = col(CY, 0.5);
-        ctx.fillText(items[i][0], lx + 10, yy);
-        ctx.fillStyle = "rgba(220,255,255,0.9)";
-        ctx.font = "600 13px " + mono;
-        ctx.fillText(items[i][1], lx + 10, yy + 15);
-        const bw2 = pw - 20;
-        ctx.fillStyle = col(CY, 0.2);
-        ctx.fillRect(lx + 10, yy + 20, bw2, 2);
-        ctx.fillStyle = col(CY, 0.8);
-        ctx.fillRect(lx + 10, yy + 20, bw2 * Math.min(1, 0.2 + amp * (0.6 + i * 0.1) + 0.05 * Math.sin(time + i)), 2);
-      }
-      ctx.font = "10px " + mono;
-      ctx.textAlign = "right";
-      for (let i = 0; i < 9; i++) {
-        const yy = ry + ph + 30 + i * 16;
-        const v = Math.floor((Math.sin(time * 0.7 + i * 1.7) * 0.5 + 0.5) * 65535);
-        ctx.fillStyle = col(CY, i === Math.floor(time * 3) % 9 ? 0.9 : 0.35);
-        ctx.fillText("0x" + v.toString(16).toUpperCase().padStart(4, "0") + "  SEKTOR " + String(i + 1).padStart(2, "0"), W - pad, yy);
-      }
-      ctx.textAlign = "left";
-      ctx.strokeStyle = col(CY, 0.18);
-      ctx.lineWidth = 1;
-      ctx.beginPath();
-      ctx.moveTo(lx + pw, ly + 40);
-      ctx.lineTo(lx + pw + 40, ly + 40);
-      ctx.lineTo(cx - R * 0.72, cy - R * 0.55);
-      ctx.moveTo(rx, ry + ph / 2);
-      ctx.lineTo(rx - 40, ry + ph / 2);
-      ctx.lineTo(cx + R * 0.72, cy - R * 0.55);
-      ctx.stroke();
-    }
-    const bh = barH(portrait);
-    const bx = pad, by = H - bh - (portrait ? 10 : 16), bw = W - pad * 2;
-    ctx.fillStyle = "rgba(0,26,40,0.62)";
-    ctx.strokeStyle = col(CY, 0.4);
-    ctx.lineWidth = 1;
-    const c = 12;
-    ctx.beginPath();
-    ctx.moveTo(bx + c, by);
-    ctx.lineTo(bx + bw - c, by);
-    ctx.lineTo(bx + bw, by + c);
-    ctx.lineTo(bx + bw, by + bh);
-    ctx.lineTo(bx, by + bh);
-    ctx.lineTo(bx, by + c);
-    ctx.closePath();
-    ctx.fill();
-    ctx.stroke();
-    const gl = bx + c + time * 0.25 % 1 * (bw - 2 * c);
-    const lg = ctx.createLinearGradient(gl - 80, 0, gl + 80, 0);
-    lg.addColorStop(0, col(CY, 0));
-    lg.addColorStop(0.5, col(CY, 0.9));
-    lg.addColorStop(1, col(CY, 0));
-    ctx.fillStyle = lg;
-    ctx.fillRect(Math.max(bx + c, gl - 80), by - 1, 160, 2);
-    ctx.fillStyle = col(CY, 0.9);
-    ctx.fillRect(bx + c, by - 1, 36, 3);
-    ctx.fillRect(bx + bw - c - 36, by - 1, 36, 3);
-    const d = /* @__PURE__ */ new Date();
-    const timeS = fmtTime.format(d);
-    const dateS = (portrait && W < 480 ? fmtDateShort : fmtDate).format(d).toUpperCase();
-    const talking = speaking;
-    const blink = Math.sin(time * 4) > 0;
-    const label = (s, x, y) => {
-      ctx.font = "600 9px " + mono;
-      ctx.fillStyle = col(CY, 0.55);
-      ctx.fillText(s, x, y);
-    };
-    const value = (s, x, y, size) => {
-      ctx.font = "600 " + size + "px " + mono;
-      ctx.fillStyle = "rgba(220,255,255,0.95)";
-      ctx.fillText(s, x, y);
-    };
-    const dot = (x, y, rgb, on) => {
-      ctx.fillStyle = col(rgb, on ? 0.95 : 0.4);
-      ctx.beginPath();
-      ctx.arc(x, y, 3.5, 0, Math.PI * 2);
-      ctx.fill();
-    };
-    const meter = (x, y, w) => {
-      const n = 14;
-      for (let i = 0; i < n; i++) {
-        const v = bins[i * 7 % NB];
-        const hh = 2 + Math.min(1, v * 2.2) * 14;
-        ctx.fillStyle = col(CY, talking ? 0.85 : 0.35);
-        ctx.fillRect(x + i * (w / n), y - hh, Math.max(1, w / n - 2), hh);
-      }
-    };
-    const wx = weather;
-    if (!portrait) {
-      const cols = wx ? 4 : 3;
-      const cw = bw / cols;
-      for (let i = 1; i < cols; i++) {
-        ctx.fillStyle = col(CY, 0.18);
-        ctx.fillRect(bx + cw * i, by + 12, 1, bh - 24);
-      }
-      let x = bx + 18;
-      label("K\xD8BENHAVN \xB7 LOKAL TID", x, by + 18);
-      value(timeS, x, by + 44, 22);
-      ctx.font = "600 22px " + mono;
-      const tW = ctx.measureText(timeS).width;
-      ctx.font = "10px " + mono;
-      ctx.fillStyle = col(CY, 0.7);
-      const dsFit = fitText(dateS, cw - tW - 40);
-      ctx.fillText(dsFit, x + tW + 12, by + 43);
-      x = bx + cw + 18;
-      label("SYSTEM", x, by + 18);
-      dot(x + 4, by + 39, "80,255,170", blink);
-      ctx.font = "600 13px " + mono;
-      ctx.fillStyle = "rgba(160,255,210,0.95)";
-      ctx.fillText(fitText("SYSTEMSTATUS: ONLINE", cw - 50), x + 14, by + 43);
-      x = bx + cw * 2 + 18;
-      label("STEMME", x, by + 18);
-      dot(x + 4, by + 39, talking ? "0,229,255" : "255,190,90", talking ? true : blink);
-      value(talking ? "TALER" : "STANDBY", x + 14, by + 44, 15);
-      meter(x + 110, by + 46, Math.min(110, cw - 140));
-      if (wx) {
-        x = bx + cw * 3 + 18;
-        label("VEJR \xB7 K\xD8GE", x, by + 18);
-        value(wx.temp, x, by + 44, 20);
-        ctx.font = "600 20px " + mono;
-        const ww = ctx.measureText(wx.temp).width;
-        ctx.font = "11px " + mono;
-        ctx.fillStyle = "rgba(200,250,255,0.85)";
-        ctx.fillText(fitText(wx.cond.toUpperCase(), cw - ww - 44), x + ww + 12, by + 33);
-        ctx.fillStyle = col(CY, 0.7);
-        ctx.fillText(fitText("VIND " + wx.wind, cw - ww - 44), x + ww + 12, by + 47);
-      }
-    } else {
-      const x = bx + 12;
-      label("K\xD8BENHAVN \xB7 LOKAL TID", x, by + 16);
-      value(timeS, x, by + 40, 22);
-      ctx.font = "10px " + mono;
-      ctx.fillStyle = col(CY, 0.7);
-      if (wx) {
-        ctx.textAlign = "right";
-        label("VEJR \xB7 K\xD8GE", bx + bw - 12, by + 16);
-        value(wx.temp, bx + bw - 12, by + 40, 20);
-        ctx.textAlign = "left";
-      }
-      ctx.fillStyle = col(CY, 0.18);
-      ctx.fillRect(bx + 10, by + 50, bw - 20, 1);
-      ctx.font = "10px " + mono;
-      ctx.fillStyle = col(CY, 0.7);
-      const half = (bw - 24) / 2;
-      ctx.fillText(fitText(dateS, wx ? half : bw - 24), x, by + 66);
-      if (wx) {
-        ctx.textAlign = "right";
-        ctx.fillStyle = "rgba(200,250,255,0.85)";
-        ctx.fillText(fitText(wx.cond.toUpperCase() + " \xB7 " + wx.wind, half), bx + bw - 12, by + 66);
-        ctx.textAlign = "left";
-      }
-      ctx.font = "600 10px " + mono;
-      const sx = x + 128;
-      dot(sx, by + 27, "80,255,170", blink);
-      ctx.fillStyle = "rgba(160,255,210,0.95)";
-      ctx.fillText("ONLINE", sx + 8, by + 31);
-      dot(sx, by + 42, talking ? "0,229,255" : "255,190,90", talking ? true : blink);
-      ctx.fillStyle = "rgba(220,255,255,0.9)";
-      ctx.fillText(talking ? "TALER" : "STANDBY", sx + 8, by + 46);
-    }
-  }
-  function fitText(s, maxW) {
-    if (ctx.measureText(s).width <= maxW) return s;
-    let t = s;
-    while (t.length > 1 && ctx.measureText(t + "\u2026").width > maxW) t = t.slice(0, -1);
-    return t + "\u2026";
-  }
-  function wrapLines(s, maxW) {
-    const out = [];
-    const parts2 = s.split(" ");
-    let line = "";
-    for (const p of parts2) {
-      const test = line ? line + " " + p : p;
-      if (ctx.measureText(test).width > maxW && line) {
-        out.push(line);
-        line = p;
-      } else line = test;
-    }
-    if (line) out.push(line);
-    return out;
-  }
-  function drawSubs(time, portrait) {
-    if (!text || subFade <= 0.01) return;
-    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
-    ctx.globalCompositeOperation = "source-over";
-    const fs = portrait ? 15 : Math.min(20, Math.max(15, W / 60));
-    ctx.font = "500 " + fs + "px ui-monospace, Menlo, Consolas, monospace";
-    const maxW = Math.min(W - 40, 860);
-    const shown = text.slice(0, Math.floor(typed));
-    const all = wrapLines(text, maxW);
-    let lines = all;
-    if (lines.length > 4) lines = lines.slice(lines.length - 4);
-    const lh = fs * 1.5;
-    const bh = lines.length * lh + 34;
-    const by = H - barH(portrait) - (portrait ? 10 : 16) - bh - 12;
-    const bx = (W - maxW) / 2 - 14;
-    ctx.globalAlpha = subFade;
-    ctx.fillStyle = "rgba(0,22,34,0.72)";
-    ctx.fillRect(bx, by, maxW + 28, bh);
-    ctx.strokeStyle = col(CY, 0.4);
-    ctx.beginPath();
-    ctx.moveTo(bx, by + 10);
-    ctx.lineTo(bx, by);
-    ctx.lineTo(bx + 24, by);
-    ctx.moveTo(bx + maxW + 28 - 24, by + bh);
-    ctx.lineTo(bx + maxW + 28, by + bh);
-    ctx.lineTo(bx + maxW + 28, by + bh - 10);
-    ctx.stroke();
-    ctx.font = "600 10px ui-monospace, Menlo, Consolas, monospace";
-    ctx.fillStyle = col(CY, 0.7);
-    ctx.fillText(speaking ? "\u25B8 TRANSMISSION" : "\u25B8 AFSLUTTET", bx + 14, by + 16);
-    ctx.font = "500 " + fs + "px ui-monospace, Menlo, Consolas, monospace";
-    let consumed = 0;
-    const skipped = all.length - lines.length;
-    for (let i = 0; i < skipped; i++) consumed += all[i].length + 1;
-    let cursorX = bx + 14, cursorY = by + 30 + lh * 0.75;
-    for (let i = 0; i < lines.length; i++) {
-      const ln = lines[i];
-      const vis = Math.max(0, Math.min(ln.length, shown.length - consumed));
-      const y = by + 30 + i * lh + lh * 0.75;
-      const part = ln.slice(0, vis);
-      ctx.fillStyle = "rgba(200,250,255,0.96)";
-      ctx.shadowColor = "rgba(0,229,255,0.8)";
-      ctx.shadowBlur = 8;
-      ctx.fillText(part, bx + 14, y);
-      ctx.shadowBlur = 0;
-      if (vis > 0 || i === 0) {
-        cursorX = bx + 14 + ctx.measureText(part).width + 2;
-        cursorY = y;
-      }
-      consumed += ln.length + 1;
-    }
-    if (speaking || Math.sin(time * 6) > 0) {
-      ctx.fillStyle = col(CY, 0.9);
-      ctx.fillRect(cursorX, cursorY - fs * 0.8, fs * 0.55, fs * 0.95);
-    }
-    ctx.globalAlpha = 1;
-  }
-  raf = requestAnimationFrame(frame);
-  return {
-    speak,
-    stop,
-    setWeather: (w) => {
-      weather = w;
-    },
-    mode: () => audioLive ? "lyd" : "simuleret",
-    destroy: () => {
-      alive = false;
-      cancelAnimationFrame(raf);
-      ro.disconnect();
-      wrap.removeEventListener("pointermove", onMove);
-      wrap.removeEventListener("pointerleave", onLeave);
-      try {
-        if (window.speechSynthesis) window.speechSynthesis.cancel();
-      } catch (_e) {
-      }
-    }
-  };
-}
+(function () {
+"use strict";
 // ===== Konfiguration =====
-const SHEET_ID = "1_SjOK0DQG3GgGA3X7HCLNKHOP8cP3NDSFpsZ-6WKF_k";
-const POLL_SECONDS = 60;
-const WEATHER_URL = "https://api.open-meteo.com/v1/forecast?latitude=55.458&longitude=12.182&current=temperature_2m,weather_code,wind_speed_10m&wind_speed_unit=ms&timezone=Europe%2FCopenhagen";
+var VERSION = "2026-11-12-v2";
+var SHEET_ID = "1_SjOK0DQG3GgGA3X7HCLNKHOP8cP3NDSFpsZ-6WKF_k";
+var POLL_SECONDS = 60;
+var LAT = 55.46, LON = 12.18;
+var WEATHER_URL = "https://api.open-meteo.com/v1/forecast?latitude=" + LAT + "&longitude=" + LON +
+  "&current=temperature_2m,apparent_temperature,weather_code,wind_speed_10m,wind_gusts_10m,wind_direction_10m,precipitation,is_day" +
+  "&hourly=temperature_2m,weather_code,precipitation_probability,precipitation,is_day" +
+  "&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,sunrise,sunset,wind_speed_10m_max" +
+  "&wind_speed_unit=ms&timezone=Europe%2FCopenhagen&forecast_days=7";
+// Familie: [navn, dag, måned, fødselsår, ikon]
+var BIRTHDAYS = [
+  ["Christina", 14, 11, 2007], ["Stine", 22, 11, 1998], ["Elliot", 20, 8, 2023], ["Lily", 30, 5, 2025],
+  ["Louise", 7, 7, 1996], ["Sebastian", 12, 2, 1996], ["Tobias", 12, 6, 1998], ["Fabian", 10, 9, 2009],
+  ["Benjamin", 11, 8, 2014], ["Farmor Kristina", 11, 2, 1975], ["Tim", 17, 7, 1973], ["Mormor", 22, 2, 1951],
+  ["Morfar", 18, 10, 1950], ["Kalle", 2, 4, 2026]
+];
+// Faste begivenheder: navn, start (Å,M,D), slut (Å,M,D) eller null, ikon. "aarlig" = gentages hvert år.
+var EVENTS = [
+  { navn: "Juleaften", m: 12, d: 24, aarlig: true, ikon: "🎄" },
+  { navn: "Kloakarbejde", start: [2026, 12, 1], slut: [2026, 12, 7], ikon: "🚧", note: "1.–7. december" }
+];
+var QUOTES = [
+  ["Livet skal forstås baglæns, men leves forlæns.", "Søren Kierkegaard"],
+  ["At rejse er at leve.", "H.C. Andersen"],
+  ["Bare det at leve er ikke nok, man må have solskin, frihed og en lille blomst.", "H.C. Andersen, Sommerfuglen"],
+  ["Hvo intet vover, intet vinder.", "Dansk ordsprog"],
+  ["Mange bække små gør en stor å.", "Dansk ordsprog"],
+  ["Hvad man ikke har i hovedet, må man have i benene.", "Dansk ordsprog"],
+  ["Laughter is the shortest distance between two people.", "Victor Borge"],
+  ["Life is what happens to you while you're busy making other plans.", "John Lennon, Beautiful Boy"],
+  ["The only way to do great work is to love what you do.", "Steve Jobs, Stanford 2005"],
+  ["Stay hungry. Stay foolish.", "Steve Jobs, Stanford 2005"],
+  ["Man is the only animal that blushes. Or needs to.", "Mark Twain"],
+  ["Imagination is more important than knowledge.", "Albert Einstein"],
+  ["That's one small step for man, one giant leap for mankind.", "Neil Armstrong, 1969"],
+  ["The only thing we have to fear is fear itself.", "Franklin D. Roosevelt, 1933"],
+  ["Ask not what your country can do for you, ask what you can do for your country.", "John F. Kennedy, 1961"],
+  ["Jeg tænker, altså er jeg.", "René Descartes"],
+  ["Det uprøvede liv er ikke værd at leve.", "Sokrates, ifølge Platon"],
+  ["Do. Or do not. There is no try.", "Yoda, Imperiet slår igen"],
+  ["Sometimes you gotta run before you can walk.", "Tony Stark, Iron Man"],
+  ["Never give in, never, never, never.", "Winston Churchill, 1941"],
+  ["I have nothing to offer but blood, toil, tears and sweat.", "Winston Churchill, 1940"],
+  ["En rejse på tusind mil begynder med et enkelt skridt.", "Laozi"],
+  ["You miss 100% of the shots you don't take.", "Wayne Gretzky"],
+  ["Float like a butterfly, sting like a bee.", "Muhammad Ali"],
+  ["Houston, we've had a problem.", "Apollo 13, 1970"],
+  ["Hope is a good thing, maybe the best of things, and no good thing ever dies.", "Andy Dufresne, En verden udenfor"],
+  ["Life moves pretty fast. If you don't stop and look around once in a while, you could miss it.", "Ferris Bueller"],
+  ["To infinity and beyond!", "Buzz Lightyear, Toy Story"],
+  ["Even the smallest person can change the course of the future.", "Galadriel, Ringenes Herre"],
+  ["All we have to decide is what to do with the time that is given us.", "Gandalf, J.R.R. Tolkien"],
+  ["Not all those who wander are lost.", "J.R.R. Tolkien"],
+  ["Don't Panic.", "Douglas Adams, Håndbog for vakse galakseblaffere"],
+  ["I love deadlines. I love the whooshing noise they make as they go by.", "Douglas Adams"],
+  ["We are what we repeatedly do. Excellence, then, is not an act, but a habit.", "Will Durant"],
+  ["I'll be back.", "Terminator"]
+];
 // =========================
-const params = new URLSearchParams(location.search);
-const GVIZ = "https://docs.google.com/spreadsheets/d/" + SHEET_ID + "/gviz/tq";
-// ?feed= override kun til lokal test (localhost), så en fremmed adresse aldrig kan indlæses som script
-const FEED_BASE = (() => { const f = params.get("feed"); try { const u = new URL(f); return (u.hostname === "127.0.0.1" || u.hostname === "localhost") ? f : GVIZ; } catch (e) { return GVIZ; } })();
-const SEEN_KEY = "vaegskaerm_seen_v1";
 
-const wrap = document.getElementById("stage");
-const holo = startHolo(document.getElementById("cv"), wrap, () => {}, { decor: false });
-const fdot = document.getElementById("fdot"), ftxt = document.getElementById("ftxt"), wlEl = document.getElementById("wl");
-const hm = new Intl.DateTimeFormat("da-DK", { timeZone: "Europe/Copenhagen", hour: "2-digit", minute: "2-digit", hour12: false });
-const dm = new Intl.DateTimeFormat("da-DK", { timeZone: "Europe/Copenhagen", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit", hour12: false });
+var params = {};
+(location.search || "").replace(/^\?/, "").split("&").forEach(function (p) { if (!p) return; var kv = p.split("="); params[decodeURIComponent(kv[0])] = kv.length > 1 ? decodeURIComponent(kv[1]) : ""; });
+var GVIZ = "https://docs.google.com/spreadsheets/d/" + SHEET_ID + "/gviz/tq";
+// ?feed= kun til lokal test (localhost)
+var FEED_BASE = GVIZ;
+if (params.feed && /^https?:\/\/(127\.0\.0\.1|localhost)(:\d+)?\//.test(params.feed)) FEED_BASE = params.feed;
+var SEEN_KEY = "vaegskaerm_seen_v1", RESUME_KEY = "vaegskaerm_resume";
 
-// ---- feed via JSONP (works without CORS, also from file://) ----
-let cbN = 0;
+function $(id) { return document.getElementById(id); }
+function esc(s) { var d = document.createElement("div"); d.textContent = s == null ? "" : String(s); return d.innerHTML; }
+function pad(n) { return (n < 10 ? "0" : "") + n; }
+var DAGE = ["søndag", "mandag", "tirsdag", "onsdag", "torsdag", "fredag", "lørdag"];
+var DAGE_K = ["søn", "man", "tir", "ons", "tor", "fre", "lør"];
+var MDR = ["januar", "februar", "marts", "april", "maj", "juni", "juli", "august", "september", "oktober", "november", "december"];
+function hm(d) { return pad(d.getHours()) + ":" + pad(d.getMinutes()); }
+function midnight(d) { return new Date(d.getFullYear(), d.getMonth(), d.getDate()); }
+function dayDiff(a, b) { return Math.round((midnight(b) - midnight(a)) / 864e5); }
+function isoWeek(d) {
+  var t = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+  var dn = t.getUTCDay() || 7; t.setUTCDate(t.getUTCDate() + 4 - dn);
+  var y0 = new Date(Date.UTC(t.getUTCFullYear(), 0, 1));
+  return Math.ceil(((t - y0) / 864e5 + 1) / 7);
+}
+function parseLocal(s) { // "2026-11-12T21:00" eller "2026-11-12"
+  var m = /^(\d{4})-(\d\d)-(\d\d)(?:T(\d\d):(\d\d))?/.exec(s || ""); if (!m) return null;
+  return new Date(+m[1], +m[2] - 1, +m[3], +(m[4] || 0), +(m[5] || 0));
+}
+function dageTekst(n) { return n === 0 ? "i dag" : n === 1 ? "i morgen" : "om " + n + " dage"; }
+
+// ---------- Ur ----------
+function tickClock() {
+  var d = new Date();
+  $("clock").innerHTML = hm(d) + '<span class="s">' + pad(d.getSeconds()) + "</span>";
+  $("wday").textContent = DAGE[d.getDay()];
+  $("date").textContent = d.getDate() + ". " + MDR[d.getMonth()] + " " + d.getFullYear();
+  $("week").textContent = "Uge " + isoWeek(d);
+  var h = d.getHours();
+  $("wrap").className = (h >= 23 || h < 6) ? "night" : "";
+}
+
+// ---------- Vejr ----------
+var WMO = {0:["Klart","☀️","🌙"],1:["Mest klart","🌤️","🌙"],2:["Delvis skyet","⛅","☁️"],3:["Overskyet","☁️","☁️"],45:["Tåge","🌫️"],48:["Rimtåge","🌫️"],
+51:["Let støvregn","🌦️","🌧️"],53:["Støvregn","🌧️"],55:["Tæt støvregn","🌧️"],56:["Isslag","🧊"],57:["Kraftigt isslag","🧊"],61:["Let regn","🌦️","🌧️"],63:["Regn","🌧️"],65:["Kraftig regn","🌧️"],
+66:["Isregn","🧊"],67:["Kraftig isregn","🧊"],71:["Let sne","🌨️"],73:["Sne","🌨️"],75:["Kraftig sne","❄️"],77:["Snefnug","🌨️"],80:["Lette byger","🌦️","🌧️"],81:["Regnbyger","🌧️"],82:["Kraftige byger","⛈️"],
+85:["Snebyger","🌨️"],86:["Kraftige snebyger","❄️"],95:["Torden","⛈️"],96:["Torden med hagl","⛈️"],99:["Kraftig torden med hagl","⛈️"]};
+function wDesc(c) { return (WMO[c] || ["Ukendt"])[0]; }
+function wIcon(c, day) { var w = WMO[c]; if (!w) return "❔"; return (!day && w[2]) ? w[2] : w[1]; }
+function windDir(deg) { return ["N", "NØ", "Ø", "SØ", "S", "SV", "V", "NV"][Math.round(((deg % 360) / 45)) % 8]; }
+function num(v, dec) { return (dec ? v.toFixed(dec) : String(Math.round(v))).replace(".", ","); }
+var weatherOk = 0, weatherFail = false;
+function loadWeather() {
+  return fetch(WEATHER_URL, { cache: "no-store" }).then(function (r) { if (!r.ok) throw new Error("http " + r.status); return r.json(); }).then(function (w) {
+    renderWeather(w); weatherOk = Date.now(); weatherFail = false; renderStatus();
+  }).catch(function () { weatherFail = true; renderStatus(); });
+}
+function renderWeather(w) {
+  var c = w.current, dl = w.daily, hr = w.hourly;
+  $("nowIcon").textContent = wIcon(c.weather_code, c.is_day);
+  $("nowTemp").textContent = num(c.temperature_2m) + "°";
+  $("nowDesc").textContent = wDesc(c.weather_code);
+  var sr = parseLocal(dl.sunrise[0]), ss = parseLocal(dl.sunset[0]);
+  var now = new Date();
+  var len = Math.round((ss - sr) / 60000);
+  var pp = dl.precipitation_probability_max[0];
+  $("nowMeta").innerHTML =
+    "Føles som <b>" + num(c.apparent_temperature) + "°</b> · i dag <b>" + num(dl.temperature_2m_max[0]) + "°</b> / " + num(dl.temperature_2m_min[0]) + "°<br>" +
+    "💧 <b>" + num(dl.precipitation_sum[0], 1) + " mm</b>" + (pp == null ? "" : " (" + pp + "%)") + " · 💨 <b>" + num(c.wind_speed_10m) + "</b> (" + num(c.wind_gusts_10m) + ") m/s " + windDir(c.wind_direction_10m);
+  $("sun").innerHTML = "🌅 <b>" + hm(sr) + "</b> &nbsp;🌇 <b>" + hm(ss) + "</b> &nbsp;" + Math.floor(len / 60) + "t " + (len % 60) + "m";
+  // næste timer
+  var start = 0, nowH = new Date(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours());
+  for (var i = 0; i < hr.time.length; i++) { if (parseLocal(hr.time[i]) >= nowH) { start = i; break; } }
+  var html = "";
+  for (var k = 0; k < 8; k++) {
+    var j = start + k * 2; if (j >= hr.time.length) break;
+    var t = parseLocal(hr.time[j]), p = hr.precipitation_probability[j], mm = hr.precipitation[j];
+    html += '<div class="hr"><div class="t">' + (k === 0 ? "Nu" : pad(t.getHours())) + '</div><div class="i">' + wIcon(hr.weather_code[j], hr.is_day[j]) +
+      '</div><div class="v">' + num(hr.temperature_2m[j]) + '°</div><div class="p">' + (p >= 20 || mm > 0 ? "💧" + p + "%" : "") + "</div></div>";
+  }
+  $("hours").innerHTML = html;
+  // 5 dage (fra i morgen)
+  var dh = "";
+  for (var n = 1; n <= 5 && n < dl.time.length; n++) {
+    var dd = parseLocal(dl.time[n]);
+    dh += '<div class="day"><div class="n">' + DAGE_K[dd.getDay()] + '</div><div class="i">' + wIcon(dl.weather_code[n], 1) +
+      '</div><div class="hl">' + num(dl.temperature_2m_max[n]) + "° <span>" + num(dl.temperature_2m_min[n]) + '°</span></div><div class="r">' +
+      (dl.precipitation_sum[n] >= 0.1 ? num(dl.precipitation_sum[n], 1) + " mm" : "tørt") + "</div></div>";
+  }
+  $("days").innerHTML = dh;
+}
+
+// ---------- Familieplan ----------
+function planFor(d) {
+  var wd = d.getDay();
+  if (wd === 0 || wd === 6) return [{ tm: "", txt: "Weekend, ingen institution 🎈" }];
+  var p = [{ tm: "08:00", txt: "Sebastian afleverer", who: "Vallø Børnehus" }];
+  if (wd === 2) p.push({ tm: "11:00", txt: "Farmordag: farmor henter 👵" });
+  else p.push({ tm: "15:00", txt: "Louise henter" });
+  return p;
+}
+var sheetToday = [];
+function renderPlan() {
+  var now = new Date(), html = "";
+  var items = planFor(now), nowM = now.getHours() * 60 + now.getMinutes();
+  items.forEach(function (it) {
+    var done = it.tm && (parseInt(it.tm, 10) * 60 + parseInt(it.tm.slice(3), 10)) < nowM - 30;
+    html += '<div class="item' + (done ? " done" : "") + '"><span class="tm">' + esc(it.tm) + "</span><span>" + esc(it.txt) + (it.who ? "<small>" + esc(it.who) + "</small>" : "") + "</span></div>";
+  });
+  sheetToday.forEach(function (r) { html += '<div class="item"><span class="tm">•</span><span><b>' + esc(r.felt) + ":</b> " + esc(r["værdi"]) + "</span></div>"; });
+  if (now.getHours() >= 16) {
+    var tm = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+    html += '<div class="sub">I morgen, ' + DAGE[tm.getDay()] + "</div>";
+    planFor(tm).forEach(function (it) { html += '<div class="item"><span class="tm">' + esc(it.tm) + "</span><span>" + esc(it.txt) + (it.who ? "<small>" + esc(it.who) + "</small>" : "") + "</span></div>"; });
+  }
+  $("plan").innerHTML = html;
+}
+
+// ---------- Nedtælling ----------
+var extraEvents = [];
+function upcoming() {
+  var today = midnight(new Date()), out = [];
+  BIRTHDAYS.forEach(function (b) {
+    var y = today.getFullYear(), d = new Date(y, b[2] - 1, b[1]);
+    if (d < today) { y++; d = new Date(y, b[2] - 1, b[1]); }
+    var age = y - b[3];
+    if (age < 1) return;
+    out.push({ ic: "🎂", navn: b[0], note: "fylder " + age + " · " + d.getDate() + ". " + MDR[d.getMonth()], date: d });
+  });
+  EVENTS.concat(extraEvents).forEach(function (e) {
+    var s, en;
+    if (e.aarlig) { s = new Date(today.getFullYear(), e.m - 1, e.d); if (s < today) s = new Date(today.getFullYear() + 1, e.m - 1, e.d); en = s; }
+    else {
+      s = e.start ? new Date(e.start[0], e.start[1] - 1, e.start[2]) : parseLocal(e.dato);
+      en = e.slut ? (e.slut.length ? (typeof e.slut === "string" ? parseLocal(e.slut) : new Date(e.slut[0], e.slut[1] - 1, e.slut[2])) : s) : s;
+      if (!s || en < today) return;
+    }
+    var running = s <= today && en >= today && en > s;
+    out.push({ ic: e.ikon || "📅", navn: e.navn, note: running ? "I gang, dag " + (dayDiff(s, today) + 1) + " af " + (dayDiff(s, en) + 1) : (e.note || (s.getDate() + ". " + MDR[s.getMonth()])), date: running ? today : s, running: running });
+  });
+  out.sort(function (a, b) { return a.date - b.date; });
+  return out.slice(0, 5);
+}
+function renderCountdown() {
+  var today = new Date();
+  $("countdown").innerHTML = upcoming().map(function (e) {
+    var n = dayDiff(today, e.date);
+    var dd = e.running ? "NU<small>i gang</small>" : n === 0 ? "🎉<small>i dag</small>" : n === 1 ? "1<small>dag</small>" : n + "<small>dage</small>";
+    return '<div class="cd' + (n === 0 ? " today" : "") + '"><div class="ic">' + e.ic + '</div><div class="nm">' + esc(e.navn) + "<small>" + esc(e.note) + '</small></div><div class="dd">' + dd + "</div></div>";
+  }).join("");
+}
+
+// ---------- Affald (data.json) ----------
+var affald = [];
+function loadData() {
+  return fetch("data.json?_=" + Date.now(), { cache: "no-store" }).then(function (r) { if (!r.ok) throw 0; return r.json(); }).then(function (j) {
+    affald = (j.affald || []).filter(function (a) { return parseLocal(a.dato); });
+    extraEvents = (j.ekstra_begivenheder || []).filter(function (e) { return e && e.navn && e.dato; });
+    renderTrash(); renderCountdown();
+  }).catch(function () { renderTrash(); });
+}
+function renderTrash() {
+  var today = midnight(new Date());
+  var next = affald.map(function (a) { return { d: parseLocal(a.dato), t: a.typer || [] }; }).filter(function (a) { return a.d >= today; }).sort(function (a, b) { return a.d - b.d; })[0];
+  if (!next) { $("trash").innerHTML = '<div class="sub">Affald</div><div class="ty">Ingen kendt dato for næste afhentning</div>'; return; }
+  var n = dayDiff(today, next.d);
+  $("trash").innerHTML = '<div class="sub">🗑️ Næste affald</div><div class="big">' + DAGE[next.d.getDay()] + " " + next.d.getDate() + ". " + MDR[next.d.getMonth()] +
+    ' <span class="when">(' + dageTekst(n) + ")</span></div>" + '<div class="ty">' + next.t.map(esc).join(" · ") + (n === 1 ? "<br>Husk at stille spandene ud i aften" : "") + "</div>";
+}
+
+// ---------- Citat ----------
+function renderQuote() {
+  var d = new Date(), idx = (Math.floor(midnight(d) / 864e5) + 0) % QUOTES.length;
+  var q = QUOTES[idx];
+  $("quote").innerHTML = "“" + esc(q[0]) + "” <b>· " + esc(q[1]) + "</b>";
+}
+
+// ---------- Beskeder fra Google Sheet (JSONP, virker uden CORS) ----------
+var cbN = 0;
 function gviz(sheet) {
-  return new Promise((resolve, reject) => {
-    const name = "__feed" + (++cbN);
-    const s = document.createElement("script");
-    const to = setTimeout(() => { cleanup(); reject(new Error("timeout")); }, 15000);
-    function cleanup() { clearTimeout(to); delete window[name]; s.remove(); }
-    window[name] = (resp) => {
+  return new Promise(function (resolve, reject) {
+    var name = "__feed" + (++cbN), s = document.createElement("script");
+    var to = setTimeout(function () { cleanup(); reject(new Error("timeout")); }, 15000);
+    function cleanup() { clearTimeout(to); try { delete window[name]; } catch (e) { window[name] = undefined; } if (s.parentNode) s.parentNode.removeChild(s); }
+    window[name] = function (resp) {
       cleanup();
       if (!resp || resp.status === "error" || !resp.table) return reject(new Error("feed"));
-      const cols = resp.table.cols.map((c) => (c.label || c.id || "").trim().toLowerCase());
-      const rows = (resp.table.rows || []).map((r) => {
-        const o = {};
-        cols.forEach((k, i) => { const c = r.c && r.c[i]; o[k] = c ? (c.f != null && typeof c.v !== "string" ? c.f : c.v) : null; if (o[k] != null) o[k] = String(o[k]).trim(); });
+      var cols = resp.table.cols.map(function (c) { return String(c.label || c.id || "").trim().toLowerCase(); });
+      resolve((resp.table.rows || []).map(function (r) {
+        var o = {};
+        cols.forEach(function (k, i) { var c = r.c && r.c[i]; o[k] = c ? (c.f != null && typeof c.v !== "string" ? c.f : c.v) : null; if (o[k] != null) o[k] = String(o[k]).trim(); });
         return o;
-      });
-      resolve(rows);
+      }));
     };
-    s.onerror = () => { cleanup(); reject(new Error("net")); };
+    s.onerror = function () { cleanup(); reject(new Error("net")); };
     s.src = FEED_BASE + "?tqx=out:json;responseHandler:" + name + "&headers=1&sheet=" + encodeURIComponent(sheet) + "&_=" + Date.now();
     document.head.appendChild(s);
   });
 }
 
-// ---- voices + audio ----
-let audioOn = false, actx = null, voice = null;
+// ---------- Lyd og stemme ----------
+var audioOn = false, actx = null, voice = null, unlocked = false, resumed = false;
 function pickVoice() {
   if (!window.speechSynthesis) return;
-  const vs = speechSynthesis.getVoices();
-  const sc = (v) => { const n = (v.name + " " + v.lang).toLowerCase(); let s = 0; if (v.lang.toLowerCase().startsWith("da")) s += 100; if (v.lang.toLowerCase().replace("_", "-") === "en-gb") s += 50; if (/daniel|arthur|george|oliver|male|magnus/.test(n)) s += 20; return s; };
-  voice = vs.slice().sort((a, b) => sc(b) - sc(a))[0] || null;
+  var vs = speechSynthesis.getVoices();
+  function sc(v) { var n = (v.name + " " + v.lang).toLowerCase(), s = 0, l = v.lang.toLowerCase().replace("_", "-"); if (l.indexOf("da") === 0) s += 100; if (l === "en-gb") s += 50; if (/daniel|arthur|george|oliver|male|magnus/.test(n)) s += 20; return s; }
+  voice = vs.slice().sort(function (a, b) { return sc(b) - sc(a); })[0] || null;
 }
 if (window.speechSynthesis) { pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; }
+function ensureAudio() { try { if (!actx) actx = new (window.AudioContext || window.webkitAudioContext)(); if (actx.state !== "running") actx.resume(); } catch (e) { actx = null; } }
 function chime(hi) {
   if (!actx) return;
-  const t = actx.currentTime;
-  const notes = hi ? [880, 660, 880] : [740, 988];
-  notes.forEach((f, i) => {
-    const o = actx.createOscillator(), g = actx.createGain();
+  var t = actx.currentTime, notes = hi ? [880, 660, 880] : [740, 988];
+  notes.forEach(function (f, i) {
+    var o = actx.createOscillator(), g = actx.createGain();
     o.type = "sine"; o.frequency.value = f;
     g.gain.setValueAtTime(0, t + i * 0.18);
     g.gain.linearRampToValueAtTime(hi ? 0.18 : 0.08, t + i * 0.18 + 0.02);
     g.gain.exponentialRampToValueAtTime(0.0001, t + i * 0.18 + 0.9);
-    o.connect(g).connect(actx.destination); o.start(t + i * 0.18); o.stop(t + i * 0.18 + 1);
+    o.connect(g); g.connect(actx.destination); o.start(t + i * 0.18); o.stop(t + i * 0.18 + 1);
   });
 }
+function say(text, cb) {
+  var done = false, wd = 0;
+  function fin() { if (done) return; done = true; clearTimeout(wd); cb(); }
+  wd = setTimeout(fin, 4000 + text.length * 90);
+  if (!audioOn || !window.speechSynthesis || typeof SpeechSynthesisUtterance === "undefined") return;
+  try {
+    var u = new SpeechSynthesisUtterance(text);
+    if (voice) { u.voice = voice; u.lang = voice.lang; } else u.lang = "da-DK";
+    u.rate = 0.98; u.pitch = 0.92;
+    u.onend = fin; u.onerror = fin;
+    speechSynthesis.cancel(); speechSynthesis.speak(u);
+    if (speechSynthesis.paused) speechSynthesis.resume();
+  } catch (e) { }
+}
 
-// ---- wake lock ----
-let lock = null;
-async function wake() {
+// ---------- Wake lock ----------
+var lock = null, wlText = "";
+function wake() {
   try {
     if ("wakeLock" in navigator) {
-      lock = await navigator.wakeLock.request("screen");
-      wlEl.textContent = "SKÆRM HOLDES TÆNDT";
-      lock.addEventListener("release", () => { wlEl.textContent = ""; });
-    } else wlEl.textContent = "SLÅ AUTO-LÅS FRA PÅ ENHEDEN";
-  } catch (e) { wlEl.textContent = "SLÅ AUTO-LÅS FRA PÅ ENHEDEN"; }
+      navigator.wakeLock.request("screen").then(function (l) { lock = l; wlText = "Skærm holdes tændt"; renderStatus(); l.addEventListener("release", function () { wlText = ""; renderStatus(); }); })
+        .catch(function () { wlText = "Slå auto-lås fra på iPad"; renderStatus(); });
+    } else { wlText = "Slå auto-lås fra på iPad"; renderStatus(); }
+  } catch (e) { wlText = "Slå auto-lås fra på iPad"; }
 }
-document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") { wake(); poll(); } });
 
-// ---- audio unlock: full overlay first time, small hint after a hard reload ----
-const RESUME_KEY = "vaegskaerm_resume";
-let unlocked = false, resumed = false;
+// ---------- Aktivering af lyd ----------
 try { resumed = sessionStorage.getItem(RESUME_KEY) === "1"; sessionStorage.removeItem(RESUME_KEY); } catch (e) {}
-const overlay = document.getElementById("unlock");
-const hint = document.createElement("button");
-hint.id = "hint"; hint.textContent = "🔇 Tryk for lyd";
-hint.style.cssText = "position:absolute;z-index:4;left:50%;transform:translateX(-50%);top:calc(34px + env(safe-area-inset-top));display:none;background:rgba(0,40,60,.7);color:#dffcff;border:1px solid rgba(0,229,255,.5);border-radius:6px;padding:6px 12px;font:600 12px ui-monospace,Menlo,Consolas,monospace;letter-spacing:.06em;cursor:pointer";
-document.getElementById("stage").appendChild(hint);
-function ensureAudio() {
-  try { if (!actx) actx = new (window.AudioContext || window.webkitAudioContext)(); if (actx.state !== "running") actx.resume(); } catch (e) { actx = null; }
-}
+var overlay = $("unlock"), hint = $("hint");
 function unlockAudio(fromGesture) {
   ensureAudio();
-  if (fromGesture) { try { if (window.speechSynthesis) { const u = new SpeechSynthesisUtterance(" "); u.volume = 0; speechSynthesis.speak(u); } } catch (e) {} }
-  audioOn = !params.has("mute");
+  if (fromGesture) { try { if (window.speechSynthesis) { var u = new SpeechSynthesisUtterance(" "); u.volume = 0; speechSynthesis.speak(u); } } catch (e) {} }
+  audioOn = !("mute" in params);
   unlocked = true;
   wake();
 }
-function updateHint() { hint.style.display = (unlocked && actx && actx.state === "running") ? "none" : (resumed ? "" : "none"); }
-overlay.addEventListener("click", () => {
+function updateHint() { hint.style.display = (unlocked && actx && actx.state === "running") ? "none" : (resumed ? "block" : "none"); }
+overlay.addEventListener("click", function () {
   unlockAudio(true);
-  const el = document.documentElement;
-  try { if (el.requestFullscreen && !document.fullscreenElement) el.requestFullscreen().catch(() => {}); } catch (e) {}
-  overlay.remove();
+  var el = document.documentElement;
+  try { if (el.requestFullscreen && !document.fullscreenElement) { var pr = el.requestFullscreen(); if (pr && pr.catch) pr.catch(function () {}); } } catch (e) {}
+  if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
   pump();
 });
 if (resumed) {
-  // hard reload happened after a previous unlock: no blocking overlay, try to resume silently
-  overlay.remove();
+  if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
   unlockAudio(false);
   setTimeout(updateHint, 800);
-  const onAny = () => { unlockAudio(true); setTimeout(updateHint, 300); if (actx && actx.state === "running") { document.removeEventListener("pointerdown", onAny, true); } };
+  var onAny = function () { unlockAudio(true); setTimeout(updateHint, 300); if (actx && actx.state === "running") document.removeEventListener("pointerdown", onAny, true); };
   document.addEventListener("pointerdown", onAny, true);
 }
-hint.addEventListener("click", (e) => { e.stopPropagation(); unlockAudio(true); setTimeout(updateHint, 300); });
+hint.addEventListener("click", function (e) { e.stopPropagation(); unlockAudio(true); setTimeout(updateHint, 300); });
 
-// ---- alerts ----
-let seen = new Set();
-try { seen = new Set(JSON.parse(localStorage.getItem(SEEN_KEY) || "[]")); } catch (e) {}
-const firstRun = seen.size === 0;
-function saveSeen() { try { localStorage.setItem(SEEN_KEY, JSON.stringify(Array.from(seen).slice(-500))); } catch (e) {} }
-const keyOf = (a) => (a.tidspunkt || "") + "|" + (a.tekst || "");
-const queue = [];
-let busy = false;
+// ---------- Alarmer ----------
+var seen = {};
+try { JSON.parse(localStorage.getItem(SEEN_KEY) || "[]").forEach(function (k) { seen[k] = 1; }); } catch (e) {}
+var firstRun = Object.keys(seen).length === 0;
+function saveSeen() { try { localStorage.setItem(SEEN_KEY, JSON.stringify(Object.keys(seen).slice(-500))); } catch (e) {} }
+function keyOf(a) { return (a.tidspunkt || "") + "|" + (a.tekst || ""); }
+var queue = [], busy = false;
+function fmtWhen(t) { var d = new Date(t); return d.getDate() + ". " + MDR[d.getMonth()].slice(0, 3) + " " + hm(d); }
 function pump() {
   if (busy || !queue.length || (!unlocked && document.getElementById("unlock"))) return;
-  queue.sort((a, b) => (b.hi ? 1 : 0) - (a.hi ? 1 : 0));
-  const a = queue.shift();
+  queue.sort(function (a, b) { return (b.hi ? 1 : 0) - (a.hi ? 1 : 0); });
+  var a = queue.shift();
   busy = true;
   chime(a.hi);
-  const el = document.querySelector('[data-k="' + CSS.escape(a.k) + '"]');
-  if (el) { el.classList.add("new"); setTimeout(() => el.classList.remove("new"), 20000); }
-  setTimeout(() => holo.speak(a.text, voice, !audioOn, () => { busy = false; setTimeout(pump, 1500); }, a.hi), a.hi ? 900 : 500);
+  var els = document.querySelectorAll(".al"), el = null;
+  for (var i = 0; i < els.length; i++) if (els[i].getAttribute("data-k") === a.k) el = els[i];
+  if (el) { el.className += " new"; setTimeout(function () { el.className = el.className.replace(" new", ""); }, 20000); }
+  var b = $("banner");
+  b.className = a.hi ? "hi" : "";
+  $("bannerMeta").textContent = (a.hi ? "⚠️ Høj prioritet · " : "🔔 ") + (a.kategori || "Besked") + " · " + a.when;
+  $("bannerText").textContent = a.text;
+  b.style.display = "block";
+  setTimeout(function () {
+    say(a.text, function () { setTimeout(function () { b.style.display = "none"; busy = false; setTimeout(pump, 1500); }, a.hi ? 25000 : 12000); });
+  }, a.hi ? 900 : 500);
 }
-function esc(s) { const d = document.createElement("div"); d.textContent = s == null ? "" : s; return d.innerHTML; }
 function renderAlerts(list) {
-  const box = document.getElementById("alertList");
-  if (!list.length) { box.innerHTML = '<div class="empty">Ingen beskeder det seneste døgn.</div>'; return; }
-  box.innerHTML = list.map((a) => '<div class="al' + (a.hi ? " hi" : "") + '" data-k="' + esc(a.k) + '"><div class="m"><span>' + esc(a.when) + "</span><span>" + esc((a.kategori || "").toUpperCase()) + "</span>" + (a.hi ? "<span>HØJ PRIORITET</span>" : "") + '</div><div class="t">' + esc(a.text) + "</div></div>").join("");
+  var box = $("alertList");
+  if (!list.length) { box.innerHTML = '<div class="okbig">✓ Ingen alarmer</div><div class="empty" style="margin-top:6px">Intet nyt det seneste døgn.</div>'; return; }
+  box.innerHTML = list.map(function (a) {
+    return '<div class="al' + (a.hi ? " hi" : "") + '" data-k="' + esc(a.k) + '"><div class="m">' + esc(a.when) + " · " + esc(a.kategori || "") + (a.hi ? " · høj prioritet" : "") + '</div><div class="t">' + esc(a.text) + "</div></div>";
+  }).join("");
 }
-function renderToday(rows) {
-  const box = document.getElementById("todayList");
-  const r = rows.filter((x) => x.felt && x["værdi"]);
-  document.getElementById("today").style.display = r.length ? "" : "none";
-  box.innerHTML = r.map((x) => '<div class="kv"><div class="k">' + esc(x.felt) + '</div><div class="v">' + esc(x["værdi"]) + "</div></div>").join("");
-}
-
-let lastOk = 0, failCount = 0, timer = 0;
-async function poll() {
+var feedOk = 0, failCount = 0, timer = 0;
+function poll() {
   clearTimeout(timer);
-  try {
-    const [al, td] = await Promise.all([gviz("alerts"), gviz("i_dag")]);
-    const now = Date.now();
-    const list = al.map((r) => {
-      const t = Date.parse(r.tidspunkt || "");
-      const exp = r["udløber"] ? Date.parse(r["udløber"]) : NaN;
-      return { k: keyOf(r), t, exp, kategori: r.kategori, hi: /^h(ø|o)j/i.test(r.prioritet || ""), text: (r.tekst || "").trim(), when: isNaN(t) ? "" : dm.format(new Date(t)) };
-    }).filter((a) => a.text && !isNaN(a.t) && now - a.t < 864e5 && a.t - now < 6e5 && !(a.exp <= now))
-      .sort((a, b) => b.t - a.t);
-    renderAlerts(list.slice(0, 12));
-    renderToday(td);
-    for (const a of list.slice().reverse()) {
-      if (seen.has(a.k)) continue;
-      seen.add(a.k);
-      if (firstRun && now - a.t > 15 * 60e3) continue; // første start: læs kun helt nye op
+  Promise.all([gviz("alerts"), gviz("i_dag")]).then(function (res) {
+    var al = res[0], td = res[1], now = Date.now();
+    var list = al.map(function (r) {
+      var t = Date.parse(r.tidspunkt || ""), exp = r["udløber"] ? Date.parse(r["udløber"]) : NaN;
+      return { k: keyOf(r), t: t, exp: exp, kategori: r.kategori, hi: /^h(ø|o)j/i.test(r.prioritet || ""), text: (r.tekst || "").trim(), when: isNaN(t) ? "" : fmtWhen(t) };
+    }).filter(function (a) { return a.text && !isNaN(a.t) && now - a.t < 864e5 && a.t - now < 6e5 && !(a.exp <= now); })
+      .sort(function (a, b) { return b.t - a.t; });
+    renderAlerts(list.slice(0, 6));
+    sheetToday = td.filter(function (x) { return x.felt && x["værdi"] && !/^eksempel/i.test(x["værdi"]); });
+    renderPlan();
+    list.slice().reverse().forEach(function (a) {
+      if (seen[a.k]) return;
+      seen[a.k] = 1;
+      if (firstRun && now - a.t > 15 * 60e3) return; // første start: læs kun helt nye op
       queue.push(a);
-    }
+    });
     saveSeen();
-    lastOk = now; failCount = 0;
-    fdot.classList.remove("off");
-    ftxt.textContent = "FEED OPDATERET " + hm.format(new Date(now));
+    feedOk = now; failCount = 0; renderStatus();
     pump();
-  } catch (e) {
-    failCount++;
-    fdot.classList.add("off");
-    ftxt.textContent = "OFFLINE" + (lastOk ? " · SIDST " + hm.format(new Date(lastOk)) : "") + " · PRØVER IGEN";
-  }
-  const delay = failCount ? Math.min(POLL_SECONDS, 10 * failCount) : POLL_SECONDS;
-  timer = setTimeout(poll, delay * 1000);
+  }).catch(function () { failCount++; renderStatus(); }).then(function () {
+    var delay = failCount ? Math.min(POLL_SECONDS, 10 * failCount) : POLL_SECONDS;
+    timer = setTimeout(poll, delay * 1000);
+  });
 }
-window.addEventListener("online", poll);
 
-const WMO = {0:"Klart",1:"Mest klart",2:"Delvis skyet",3:"Overskyet",45:"Tåge",48:"Rimtåge",51:"Let støvregn",53:"Støvregn",55:"Tæt støvregn",56:"Isslag",57:"Kraftigt isslag",61:"Let regn",63:"Regn",65:"Kraftig regn",66:"Isregn",67:"Kraftig isregn",71:"Let sne",73:"Sne",75:"Kraftig sne",77:"Snefnug",80:"Lette byger",81:"Regnbyger",82:"Kraftige byger",85:"Snebyger",86:"Kraftige snebyger",95:"Torden",96:"Torden med hagl",99:"Kraftig torden med hagl"};
-async function loadWeather() {
-  try {
-    const r = await fetch(WEATHER_URL); if (!r.ok) throw 0;
-    const c = (await r.json()).current;
-    holo.setWeather({ temp: Math.round(c.temperature_2m) + "°", cond: WMO[c.weather_code] || "Ukendt", wind: c.wind_speed_10m.toFixed(1).replace(".", ",") + " m/s" });
-  } catch (e) { /* behold sidste vejr, eller skjul hvis aldrig hentet */ }
+// ---------- Status ----------
+function renderStatus() {
+  var online = navigator.onLine !== false && !weatherFail;
+  var net = online ? '<span class="dot"></span>Netværk: OK' : '<span class="dot off"></span>Netværk: offline';
+  var feed = failCount ? '<span class="dot warn"></span>Beskeder: prøver igen' + (feedOk ? " (sidst " + hm(new Date(feedOk)) + ")" : "")
+    : feedOk ? '<span class="dot"></span>Beskeder ' + hm(new Date(feedOk)) : '<span class="dot warn"></span>Beskeder: forbinder';
+  var w = weatherOk ? " · vejr " + hm(new Date(weatherOk)) : "";
+  $("status").innerHTML = net + " &nbsp; " + feed + "<br>" + esc(wlText) + w;
 }
-// keep side panel above subtitles + bottom bar
-function layout() { document.documentElement.style.setProperty("--bottom", (innerHeight > innerWidth * 1.1 ? 230 : 200) + "px"); }
-addEventListener("resize", layout); layout();
-loadWeather(); setInterval(loadWeather, 15 * 60e3);
-poll();
-// ---- daily refresh at 04:00, soft by default so audio unlock and Wake Lock survive ----
-let lastDaily = "";
-const dayFmt = new Intl.DateTimeFormat("sv-SE", { timeZone: "Europe/Copenhagen", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", hour12: false });
-let wallRef = Date.now(), perfRef = performance.now();
-function softRefresh() {
-  // clear memory: prune seen keys older than 48 h, rebuild lists, re-fetch everything
-  const cut = Date.now() - 48 * 3600e3;
-  seen = new Set(Array.from(seen).filter((k) => { const t = Date.parse(k.split("|")[0]); return isNaN(t) || t > cut; }));
-  saveSeen();
-  queue.length = 0;
-  document.getElementById("alertList").innerHTML = "";
-  document.getElementById("todayList").innerHTML = "";
-  holo.stop(); busy = false;
-  pickVoice();
-  if (unlocked) { ensureAudio(); if (!lock || lock.released) wake(); }
-  loadWeather(); poll();
-  wallRef = Date.now(); perfRef = performance.now();
-  return "soft";
-}
+window.addEventListener("online", function () { renderStatus(); poll(); loadWeather(); });
+window.addEventListener("offline", renderStatus);
+document.addEventListener("visibilitychange", function () { if (document.visibilityState === "visible") { if (unlocked) wake(); poll(); loadWeather(); } });
+
+// ---------- Skærmvagt: let pixel-skift ----------
+function shift() { var x = Math.round(Math.random() * 8 - 4), y = Math.round(Math.random() * 6 - 3); $("wrap").style.transform = "translate(" + x + "px," + y + "px)"; }
+
+// ---------- Opdatering ----------
 function hardReload(reason) {
   try { if (unlocked) sessionStorage.setItem(RESUME_KEY, "1"); } catch (e) {}
-  console.log("hard reload:", reason);
+  if (window.console) console.log("genindlæser:", reason);
   location.reload();
-  return "hard";
 }
-function needsHard() {
-  // clock drift between wall time and monotonic time (sleep, suspended tab, bad clock) or heavy memory
-  const drift = Math.abs((Date.now() - wallRef) - (performance.now() - perfRef));
-  const mem = performance.memory ? performance.memory.usedJSHeapSize : 0;
-  return drift > 10 * 60e3 ? "drift " + Math.round(drift / 1000) + "s" : mem > 400e6 ? "memory " + Math.round(mem / 1e6) + "MB" : "";
+function refreshAll() { renderPlan(); renderCountdown(); renderQuote(); renderTrash(); loadData(); loadWeather(); poll(); pickVoice(); if (unlocked) { ensureAudio(); if (!lock || lock.released) wake(); } }
+function hourly() {
+  if ("reload" in params) return hardReload("time");
+  // genindlæs kun hvis en ny version er udgivet, så lyd og wake lock bevares
+  fetch(location.pathname + "?v=" + Date.now(), { cache: "no-store" }).then(function (r) { return r.text(); }).then(function (t) {
+    var m = /var VERSION = "([^"]+)"/.exec(t);
+    if (m && m[1] !== VERSION) hardReload("ny version " + m[1]); else refreshAll();
+  }).catch(refreshAll);
 }
-function dailyCheck(now) {
-  const parts = dayFmt.format(now || new Date()); // "2026-11-13 04"
-  const day = parts.slice(0, 10), hour = parts.slice(-2);
-  if (hour !== "04" || day === lastDaily) return "";
-  lastDaily = day;
-  if (!unlocked) return hardReload("never unlocked");
-  const why = needsHard();
-  return why ? hardReload(why) : softRefresh();
-}
-setInterval(() => dailyCheck(), 60e3);
-window.__vaeg = { softRefresh, hardReload, dailyCheck, state: () => ({ unlocked, resumed, audio: actx ? actx.state : "none", wake: wlEl.textContent, feed: ftxt.textContent, alerts: document.querySelectorAll(".al").length, hint: hint.style.display !== "none" }) };
-</script></body></html>
+var lastDay = new Date().getDate(), lastHour = new Date().getHours();
+setInterval(function () {
+  var d = new Date();
+  if (d.getDate() !== lastDay) { lastDay = d.getDate(); refreshAll(); }
+  if (d.getHours() !== lastHour) {
+    lastHour = d.getHours();
+    if (d.getHours() === 4 && !unlocked) return hardReload("dagligt, ikke aktiveret");
+    hourly();
+  }
+}, 1000);
+
+// ---------- Start ----------
+tickClock(); setInterval(tickClock, 1000);
+renderPlan(); renderCountdown(); renderQuote(); renderTrash(); renderStatus();
+loadData(); loadWeather(); poll();
+setInterval(loadWeather, 15 * 60e3);
+setInterval(renderPlan, 5 * 60e3);
+setInterval(shift, 2 * 60e3);
+window.__vaeg = { version: VERSION, refreshAll: refreshAll, hardReload: hardReload, upcoming: upcoming, isoWeek: isoWeek, state: function () { return { unlocked: unlocked, audio: actx ? actx.state : "none", feedOk: feedOk, weatherOk: weatherOk, alerts: document.querySelectorAll(".al").length }; } };
+})();
+</script>
+</body>
+</html>

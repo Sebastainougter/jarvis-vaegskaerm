@@ -1,0 +1,8 @@
+{
+  "_note": "Redigerbare data til vægskærmen. Affald: tilføj kun kendte datoer (ÅÅÅÅ-MM-DD). Gamle datoer skjules automatisk.",
+  "opdateret": "2026-11-12",
+  "affald": [
+    { "dato": "2026-11-17", "typer": ["Papir/pap/glas", "Plast/metal/MDK"] }
+  ],
+  "ekstra_begivenheder": []
+}

@@ -33,6 +33,13 @@ html,body{margin:0;height:100%;background:#000306;color:#bff6ff;font-family:var(
 .pan h2 span{float:right;color:rgba(var(--cy),.45);letter-spacing:.08em}
 .glow{color:#e8fdff;text-shadow:0 0 10px rgba(var(--cy),.55)}
 .lbl{font-size:12px;letter-spacing:.12em;color:rgba(var(--cy),.6);text-transform:uppercase}
+/* kun venstre kolonne: lidt tættere afstand, så kameraerne kan fylde bredden i 16:9 */
+#cols > .col:first-child .pan{padding:8px 16px;margin-bottom:8px}
+#cols > .col:first-child .pan:last-child{margin-bottom:0}
+#cols > .col:first-child .pan h2{margin:0 0 6px}
+#cols > .col:first-child .item{padding:1px 0}
+#cols > .col:first-child .sub{margin:5px 0 1px}
+#cols > .col:first-child #trash{margin-top:5px;padding-top:5px}
 /* feed-linje */
 #feed{position:absolute;z-index:3;left:0;right:0;top:12px;text-align:center;font-size:13px;letter-spacing:.14em;color:rgba(var(--cy),.75);white-space:nowrap}
 #feed b{color:#a0ffd2;font-weight:600}
@@ -59,7 +66,7 @@ html,body{margin:0;height:100%;background:#000306;color:#bff6ff;font-family:var(
 .kam-tile{position:relative;-webkit-box-flex:1;flex:1;min-height:0;min-width:0;display:-webkit-box;display:flex;-webkit-box-orient:vertical;flex-direction:column;-webkit-box-pack:center;justify-content:center;-webkit-box-align:center;align-items:center}
 .kam-label{position:absolute;left:8px;top:6px;z-index:2;font-size:11px;letter-spacing:.12em;color:rgba(var(--cy),.85);text-transform:uppercase;margin:0;text-shadow:0 0 8px #000,0 0 4px #000;pointer-events:none}
 .kam-view{position:relative;width:100%;background:#00040a;overflow:hidden;border:1px solid rgba(var(--cy),.28)}
-.kam-view iframe{position:absolute;left:0;top:-52px;width:100%;height:calc(100% + 52px);border:0;background:#000}
+.kam-view iframe{position:absolute;border:0;background:#000;-webkit-transform-origin:0 0;transform-origin:0 0}
 .kam-off{position:absolute;left:0;top:0;right:0;bottom:0;display:-webkit-box;display:flex;-webkit-box-orient:vertical;flex-direction:column;-webkit-box-align:center;align-items:center;-webkit-box-pack:center;justify-content:center;text-align:center;color:rgba(var(--cy),.58);font-size:11px;letter-spacing:.12em;text-transform:uppercase;background:linear-gradient(180deg,rgba(0,20,30,.55),rgba(0,8,14,.85))}
 .kam-off small{display:block;margin-top:5px;font-size:10px;letter-spacing:.14em;color:rgba(var(--cy),.4);text-transform:uppercase}
 /* plan */
@@ -74,11 +81,11 @@ html,body{margin:0;height:100%;background:#000306;color:#bff6ff;font-family:var(
 #trash .big .when{color:rgb(var(--warm))}
 #trash .ty{font-size:14px;color:rgba(var(--cy),.75);margin-top:2px;line-height:1.4}
 /* nedtælling: kompakte enkeltlinjer, så kameraerne kan være større */
-.cd{display:-webkit-box;display:flex;-webkit-box-align:center;align-items:center;padding:1px 0;border-bottom:1px solid rgba(var(--cy),.12)}
+.cd{display:-webkit-box;display:flex;-webkit-box-align:center;align-items:center;padding:0;border-bottom:1px solid rgba(var(--cy),.12)}
 .cd:last-child{border-bottom:0}
-.cd .ic{width:20px;font-size:13px;flex-shrink:0}
-.cd .nm{-webkit-box-flex:1;flex:1;min-width:0;font-size:13px;color:#e8fdff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.cd .dd{min-width:36px;text-align:right;font-size:13px;font-weight:700;color:rgb(var(--cy));text-shadow:0 0 8px rgba(var(--cy),.55);font-variant-numeric:tabular-nums;letter-spacing:.04em}
+.cd .ic{width:18px;font-size:12px;flex-shrink:0}
+.cd .nm{-webkit-box-flex:1;flex:1;min-width:0;font-size:12px;color:#e8fdff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cd .dd{min-width:32px;text-align:right;font-size:12px;font-weight:700;color:rgb(var(--cy));text-shadow:0 0 8px rgba(var(--cy),.55);font-variant-numeric:tabular-nums;letter-spacing:.04em}
 .cd.today .dd{color:rgb(var(--warm));text-shadow:0 0 8px rgba(var(--warm),.6)}
 /* beskeder */
 .al{border-left:2px solid rgba(var(--cy),.65);padding:5px 0 5px 11px;margin:0 0 8px;transition:background .6s}
@@ -160,7 +167,7 @@ html,body{margin:0;height:100%;background:#000306;color:#bff6ff;font-family:var(
 (function () {
 "use strict";
 // ===== Konfiguration =====
-var VERSION = "2026-11-13-v3d";
+var VERSION = "2026-11-13-v3e";
 var SHEET_ID = "1_SjOK0DQG3GgGA3X7HCLNKHOP8cP3NDSFpsZ-6WKF_k";
 var POLL_SECONDS = 60;
 // Familie: [navn, dag, måned, fødselsår, ikon]
@@ -620,7 +627,7 @@ function sizeKamera() {
   if (!row) return;
   var views = [$("kam1"), $("kam2")];
   var tiles = row.querySelectorAll(".kam-tile");
-  var rh = row.clientHeight, i, box, tile, tw, per, h, w;
+  var rh = row.clientHeight, i, box, tile, tw, per, h, w, f, vw, vh, sc, left, top;
   if (rh < 8) return;
   per = Math.floor((rh - 8) / 2);
   for (i = 0; i < views.length; i++) {
@@ -628,9 +635,14 @@ function sizeKamera() {
     tile = tiles[i] || box.parentNode;
     tw = tile.clientWidth || 0;
     if (!tw) continue;
-    h = Math.max(60, Math.min(per, Math.round(tw * 9 / 16)));
-    w = Math.round(h * 16 / 9);
-    if (w > tw) { w = tw; h = Math.round(w * 9 / 16); }
+    // Foretrukket: fuld kolonnebredde i 16:9 (contain, ikke cover).
+    w = tw;
+    h = Math.round(w * 9 / 16);
+    if (h > per) {
+      h = Math.max(60, per);
+      w = Math.round(h * 16 / 9);
+      if (w > tw) { w = tw; h = Math.round(w * 9 / 16); }
+    }
     box.style.height = h + "px";
     box.style.width = w + "px";
     box.style.marginLeft = w < tw ? "auto" : "0";
@@ -639,6 +651,20 @@ function sizeKamera() {
     if (lab) {
       lab.style.left = (box.offsetLeft + 8) + "px";
       lab.style.top = (box.offsetTop + 6) + "px";
+    }
+    // Indlejret UniFi-side i et større 16:9-lærred, skaleret ned (contain), så billedet ikke beskæres.
+    f = box.querySelector("iframe");
+    if (f) {
+      vw = 640; vh = 360;
+      sc = Math.min(w / vw, h / vh);
+      left = Math.round((w - vw * sc) / 2);
+      top = Math.round((h - vh * sc) / 2);
+      f.style.width = vw + "px";
+      f.style.height = vh + "px";
+      f.style.left = left + "px";
+      f.style.top = top + "px";
+      f.style.webkitTransform = "scale(" + sc + ")";
+      f.style.transform = "scale(" + sc + ")";
     }
   }
 }
@@ -688,7 +714,8 @@ function setKamera(id, raw) {
   var f = document.createElement("iframe");
   f.src = url;
   f.title = "Kamera";
-  f.setAttribute("allow", "autoplay; fullscreen");
+  f.setAttribute("allow", "autoplay; fullscreen; encrypted-media");
+  f.setAttribute("allowfullscreen", "true");
   f.setAttribute("referrerpolicy", "no-referrer-when-downgrade");
   f.addEventListener("error", function () {
     if ((box.getAttribute("data-url") || "") !== url) return;
@@ -697,6 +724,7 @@ function setKamera(id, raw) {
     kamOff(box, "KAMERA OFFLINE", "kunne ikke indlæses");
   });
   box.appendChild(f);
+  sizeKamera();
 }
 function applyKamera(rows) {
   var m = settingsMap(rows);

@@ -9,7 +9,7 @@ Viser:
 - Næste affaldsafhentning fra `data.json`
 - Dagens citat
 - Beskeder og alarmer fra et Google Sheet (gviz-feed, faneblade `alerts` og `i_dag`), med lyd og oplæsning efter ét tryk
-- To kamerafelter under hinanden (Indkørsel og Firmabil), 16:9 og så store som venstre kolonne tillader, med live-feed fra UniFi Protect-sharelinks hentet fra sheet-fanen `indstillinger`
+- To kamerafelter under hinanden (Indkørsel og Firmabil), i 16:9 og i fuld venstre-kolonnebredde, med hele billedrammen synlig (contain, ikke beskæring). Live-feed fra UniFi Protect-sharelinks hentet fra sheet-fanen `indstillinger`
 
 ## Opdatering af data
 `data.json` kan redigeres uden at røre koden:

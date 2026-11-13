@@ -52,6 +52,15 @@ html,body{margin:0;height:100%;background:#000306;color:#bff6ff;font-family:var(
 #week{display:inline-block;margin-top:9px;font-size:14px;font-weight:700;letter-spacing:.16em;color:#000306;background:rgb(var(--cy));padding:3px 10px;box-shadow:0 0 14px rgba(var(--cy),.7)}
 #quote{font-size:16px;line-height:1.4;color:#d6f8ff}
 #quote b{display:block;font-weight:600;font-size:12px;letter-spacing:.12em;color:rgba(var(--cy),.65);margin-top:4px;text-transform:uppercase}
+
+/* kamera */
+.kam-row{display:-webkit-box;display:flex;gap:8px}
+.kam-tile{-webkit-box-flex:1;flex:1;min-width:0}
+.kam-label{font-size:11px;letter-spacing:.12em;color:rgba(var(--cy),.6);text-transform:uppercase;margin:0 0 4px}
+.kam-view{position:relative;height:72px;background:#00040a;overflow:hidden;border:1px solid rgba(var(--cy),.28)}
+.kam-view iframe{position:absolute;left:0;top:-52px;width:100%;height:calc(100% + 52px);border:0;background:#000}
+.kam-off{position:absolute;left:0;top:0;right:0;bottom:0;display:-webkit-box;display:flex;-webkit-box-orient:vertical;flex-direction:column;-webkit-box-align:center;align-items:center;-webkit-box-pack:center;justify-content:center;text-align:center;color:rgba(var(--cy),.58);font-size:11px;letter-spacing:.12em;text-transform:uppercase;background:linear-gradient(180deg,rgba(0,20,30,.55),rgba(0,8,14,.85))}
+.kam-off small{display:block;margin-top:5px;font-size:10px;letter-spacing:.14em;color:rgba(var(--cy),.4);text-transform:uppercase}
 /* plan */
 .item{display:-webkit-box;display:flex;-webkit-box-align:baseline;align-items:baseline;font-size:18px;line-height:1.3;padding:3px 0;color:#e8fdff}
 .item .tm{min-width:66px;font-weight:700;color:rgb(var(--warm));text-shadow:0 0 8px rgba(var(--warm),.45);font-variant-numeric:tabular-nums}
@@ -118,6 +127,13 @@ html,body{margin:0;height:100%;background:#000306;color:#bff6ff;font-family:var(
 <div id="cols">
   <div class="col">
     <div class="pan"><h2>I DAG<span id="planTag"></span></h2><div id="plan"></div><div id="trash"></div></div>
+    <div class="pan" id="kameraPan">
+      <h2>KAMERA</h2>
+      <div class="kam-row">
+        <div class="kam-tile"><div class="kam-label">INDKØRSEL</div><div class="kam-view" id="kam1" data-url=""></div></div>
+        <div class="kam-tile"><div class="kam-label">FIRMABIL</div><div class="kam-view" id="kam2" data-url=""></div></div>
+      </div>
+    </div>
     <div class="pan grow"><h2>NEDTÆLLING</h2><div id="countdown"></div></div>
   </div>
   <div class="mid">
@@ -145,7 +161,7 @@ html,body{margin:0;height:100%;background:#000306;color:#bff6ff;font-family:var(
 (function () {
 "use strict";
 // ===== Konfiguration =====
-var VERSION = "2026-11-12-v3b";
+var VERSION = "2026-11-13-v3c";
 var SHEET_ID = "1_SjOK0DQG3GgGA3X7HCLNKHOP8cP3NDSFpsZ-6WKF_k";
 var POLL_SECONDS = 60;
 // Familie: [navn, dag, måned, fødselsår, ikon]
@@ -429,7 +445,7 @@ function upcoming() {
     out.push({ ic: e.ikon || "📅", navn: e.navn, note: running ? "I gang, dag " + (dayDiff(s, today) + 1) + " af " + (dayDiff(s, en) + 1) : (e.note || (s.getDate() + ". " + MDR[s.getMonth()])), date: running ? today : s, running: running });
   });
   out.sort(function (a, b) { return a.date - b.date; });
-  return out.slice(0, 5);
+  return out.slice(0, 4);
 }
 function renderCountdown() {
   var today = new Date();
@@ -598,10 +614,77 @@ function renderAlerts(list) {
   }).join("");
 }
 var feedOk = 0, failCount = 0, timer = 0;
+function kamOff(el, title, sub) {
+  el.className = "kam-view";
+  el.innerHTML = '<div class="kam-off">' + esc(title) + "<small>" + esc(sub) + "</small></div>";
+}
+function validCamUrl(u) {
+  if (!u) return "";
+  u = String(u).trim();
+  if (/^https:\/\/monitor\.ui\.com\/[A-Za-z0-9-]+\/?$/.test(u)) return u.replace(/\/$/, "");
+  // kun til lokal forhåndsvisning, samme regel som ?feed=
+  if (params.feed && /^https?:\/\/(127\.0\.0\.1|localhost)(:\d+)?\/[A-Za-z0-9._~\-\/?=&]*$/.test(u)) return u;
+  return "";
+}
+function settingsMap(rows) {
+  var o = {};
+  (rows || []).forEach(function (r) {
+    var k = (r["nøgle"] || r.key || r.felt || "").toLowerCase();
+    var v = r["værdi"] || r.value || "";
+    if (k) o[k] = v;
+  });
+  return o;
+}
+function setKamera(id, raw) {
+  var box = $(id); if (!box) return;
+  var url = validCamUrl(raw);
+  var prev = box.getAttribute("data-url") || "";
+  if (!raw || !String(raw).trim()) {
+    if (prev === "" && box.getAttribute("data-state") === "empty") return;
+    box.setAttribute("data-url", "");
+    box.setAttribute("data-state", "empty");
+    kamOff(box, "KAMERA OFFLINE", "intet link");
+    return;
+  }
+  if (!url) {
+    if (prev === "" && box.getAttribute("data-state") === "bad") return;
+    box.setAttribute("data-url", "");
+    box.setAttribute("data-state", "bad");
+    kamOff(box, "KAMERA OFFLINE", "ugyldigt link");
+    return;
+  }
+  if (url === prev && box.getAttribute("data-state") === "live") return;
+  box.setAttribute("data-url", url);
+  box.setAttribute("data-state", "live");
+  box.innerHTML = "";
+  var f = document.createElement("iframe");
+  f.src = url;
+  f.title = "Kamera";
+  f.setAttribute("allow", "autoplay; fullscreen");
+  f.setAttribute("referrerpolicy", "no-referrer-when-downgrade");
+  f.addEventListener("error", function () {
+    if ((box.getAttribute("data-url") || "") !== url) return;
+    box.setAttribute("data-url", "");
+    box.setAttribute("data-state", "err");
+    kamOff(box, "KAMERA OFFLINE", "kunne ikke indlæses");
+  });
+  box.appendChild(f);
+}
+function applyKamera(rows) {
+  var m = settingsMap(rows);
+  setKamera("kam1", m.kamera_url);
+  setKamera("kam2", m.kamera_url_2);
+}
+kamOff($("kam1"), "KAMERA OFFLINE", "intet link");
+kamOff($("kam2"), "KAMERA OFFLINE", "intet link");
+$("kam1").setAttribute("data-state", "empty");
+$("kam2").setAttribute("data-state", "empty");
+
 function poll() {
   clearTimeout(timer);
-  Promise.all([gviz("alerts"), gviz("i_dag")]).then(function (res) {
+  Promise.all([gviz("alerts"), gviz("i_dag"), gviz("indstillinger").catch(function () { return []; })]).then(function (res) {
     var al = res[0], td = res[1], now = Date.now();
+    applyKamera(res[2]);
     var list = al.map(function (r) {
       var t = Date.parse(r.tidspunkt || ""), exp = r["udløber"] ? Date.parse(r["udløber"]) : NaN;
       return { k: keyOf(r), t: t, exp: exp, kategori: r.kategori, hi: /^h(ø|o)j/i.test(r.prioritet || ""), text: (r.tekst || "").trim(), when: isNaN(t) ? "" : fmtWhen(t) };

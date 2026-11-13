@@ -5,11 +5,11 @@ Statisk side til en altid-tændt iPad (landscape) i J.A.R.V.I.S-tema: cyan HUD p
 Viser:
 - Ur, dato og ugenummer
 - Dagens familieplan (faste regler pr. ugedag i `index.html`)
-- Nedtællinger til fødselsdage, jul og andre begivenheder
+- Nedtællinger til de næste tre begivenheder (fødselsdage, jul m.m.), vist som kompakte enkeltlinjer
 - Næste affaldsafhentning fra `data.json`
 - Dagens citat
 - Beskeder og alarmer fra et Google Sheet (gviz-feed, faneblade `alerts` og `i_dag`), med lyd og oplæsning efter ét tryk
-- To kamerafelter (Indkørsel og Firmabil) med live-feed fra UniFi Protect-sharelinks, hentet fra sheet-fanen `indstillinger`
+- To kamerafelter under hinanden (Indkørsel og Firmabil), 16:9 og så store som venstre kolonne tillader, med live-feed fra UniFi Protect-sharelinks hentet fra sheet-fanen `indstillinger`
 
 ## Opdatering af data
 `data.json` kan redigeres uden at røre koden:

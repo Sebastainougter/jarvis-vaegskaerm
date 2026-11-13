@@ -54,10 +54,11 @@ html,body{margin:0;height:100%;background:#000306;color:#bff6ff;font-family:var(
 #quote b{display:block;font-weight:600;font-size:12px;letter-spacing:.12em;color:rgba(var(--cy),.65);margin-top:4px;text-transform:uppercase}
 
 /* kamera */
-.kam-row{display:-webkit-box;display:flex;gap:8px}
-.kam-tile{-webkit-box-flex:1;flex:1;min-width:0}
-.kam-label{font-size:11px;letter-spacing:.12em;color:rgba(var(--cy),.6);text-transform:uppercase;margin:0 0 4px}
-.kam-view{position:relative;height:72px;background:#00040a;overflow:hidden;border:1px solid rgba(var(--cy),.28)}
+#kameraPan{display:-webkit-box;display:flex;-webkit-box-orient:vertical;flex-direction:column;min-height:0}
+.kam-row{display:-webkit-box;display:flex;-webkit-box-orient:vertical;flex-direction:column;-webkit-box-flex:1;flex:1;min-height:0;gap:8px}
+.kam-tile{position:relative;-webkit-box-flex:1;flex:1;min-height:0;min-width:0;display:-webkit-box;display:flex;-webkit-box-orient:vertical;flex-direction:column;-webkit-box-pack:center;justify-content:center;-webkit-box-align:center;align-items:center}
+.kam-label{position:absolute;left:8px;top:6px;z-index:2;font-size:11px;letter-spacing:.12em;color:rgba(var(--cy),.85);text-transform:uppercase;margin:0;text-shadow:0 0 8px #000,0 0 4px #000;pointer-events:none}
+.kam-view{position:relative;width:100%;background:#00040a;overflow:hidden;border:1px solid rgba(var(--cy),.28)}
 .kam-view iframe{position:absolute;left:0;top:-52px;width:100%;height:calc(100% + 52px);border:0;background:#000}
 .kam-off{position:absolute;left:0;top:0;right:0;bottom:0;display:-webkit-box;display:flex;-webkit-box-orient:vertical;flex-direction:column;-webkit-box-align:center;align-items:center;-webkit-box-pack:center;justify-content:center;text-align:center;color:rgba(var(--cy),.58);font-size:11px;letter-spacing:.12em;text-transform:uppercase;background:linear-gradient(180deg,rgba(0,20,30,.55),rgba(0,8,14,.85))}
 .kam-off small{display:block;margin-top:5px;font-size:10px;letter-spacing:.14em;color:rgba(var(--cy),.4);text-transform:uppercase}
@@ -72,15 +73,13 @@ html,body{margin:0;height:100%;background:#000306;color:#bff6ff;font-family:var(
 #trash .big{font-size:18px;font-weight:700;color:#e8fdff}
 #trash .big .when{color:rgb(var(--warm))}
 #trash .ty{font-size:14px;color:rgba(var(--cy),.75);margin-top:2px;line-height:1.4}
-/* nedtælling */
-.cd{display:-webkit-box;display:flex;-webkit-box-align:center;align-items:center;padding:4px 0;border-bottom:1px solid rgba(var(--cy),.12)}
+/* nedtælling: kompakte enkeltlinjer, så kameraerne kan være større */
+.cd{display:-webkit-box;display:flex;-webkit-box-align:center;align-items:center;padding:1px 0;border-bottom:1px solid rgba(var(--cy),.12)}
 .cd:last-child{border-bottom:0}
-.cd .ic{width:34px;font-size:22px}
-.cd .nm{-webkit-box-flex:1;flex:1;min-width:0;font-size:17px;color:#e8fdff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.cd .nm small{display:block;font-size:12px;color:rgba(var(--cy),.6);letter-spacing:.06em;text-transform:uppercase}
-.cd .dd{min-width:64px;text-align:right;font-size:26px;font-weight:700;color:rgb(var(--cy));text-shadow:0 0 10px rgba(var(--cy),.6);font-variant-numeric:tabular-nums}
-.cd .dd small{display:block;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:rgba(var(--cy),.6);text-shadow:none}
-.cd.today .dd{color:rgb(var(--warm));text-shadow:0 0 10px rgba(var(--warm),.6)}
+.cd .ic{width:20px;font-size:13px;flex-shrink:0}
+.cd .nm{-webkit-box-flex:1;flex:1;min-width:0;font-size:13px;color:#e8fdff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cd .dd{min-width:36px;text-align:right;font-size:13px;font-weight:700;color:rgb(var(--cy));text-shadow:0 0 8px rgba(var(--cy),.55);font-variant-numeric:tabular-nums;letter-spacing:.04em}
+.cd.today .dd{color:rgb(var(--warm));text-shadow:0 0 8px rgba(var(--warm),.6)}
 /* beskeder */
 .al{border-left:2px solid rgba(var(--cy),.65);padding:5px 0 5px 11px;margin:0 0 8px;transition:background .6s}
 .al .m{font-size:11px;color:rgba(var(--cy),.62);letter-spacing:.08em;text-transform:uppercase}
@@ -127,14 +126,14 @@ html,body{margin:0;height:100%;background:#000306;color:#bff6ff;font-family:var(
 <div id="cols">
   <div class="col">
     <div class="pan"><h2>I DAG<span id="planTag"></span></h2><div id="plan"></div><div id="trash"></div></div>
-    <div class="pan" id="kameraPan">
+    <div class="pan grow" id="kameraPan">
       <h2>KAMERA</h2>
       <div class="kam-row">
         <div class="kam-tile"><div class="kam-label">INDKØRSEL</div><div class="kam-view" id="kam1" data-url=""></div></div>
         <div class="kam-tile"><div class="kam-label">FIRMABIL</div><div class="kam-view" id="kam2" data-url=""></div></div>
       </div>
     </div>
-    <div class="pan grow"><h2>NEDTÆLLING</h2><div id="countdown"></div></div>
+    <div class="pan"><h2>NEDTÆLLING</h2><div id="countdown"></div></div>
   </div>
   <div class="mid">
     <div id="reactor"><canvas id="rx"></canvas>
@@ -161,7 +160,7 @@ html,body{margin:0;height:100%;background:#000306;color:#bff6ff;font-family:var(
 (function () {
 "use strict";
 // ===== Konfiguration =====
-var VERSION = "2026-11-13-v3c";
+var VERSION = "2026-11-13-v3d";
 var SHEET_ID = "1_SjOK0DQG3GgGA3X7HCLNKHOP8cP3NDSFpsZ-6WKF_k";
 var POLL_SECONDS = 60;
 // Familie: [navn, dag, måned, fødselsår, ikon]
@@ -420,6 +419,7 @@ function renderPlan() {
   }
   $("plan").innerHTML = html;
   $("planTag").textContent = DAGE[now.getDay()].toUpperCase();
+  sizeKamera();
 }
 
 // ---------- Nedtælling ----------
@@ -445,15 +445,16 @@ function upcoming() {
     out.push({ ic: e.ikon || "📅", navn: e.navn, note: running ? "I gang, dag " + (dayDiff(s, today) + 1) + " af " + (dayDiff(s, en) + 1) : (e.note || (s.getDate() + ". " + MDR[s.getMonth()])), date: running ? today : s, running: running });
   });
   out.sort(function (a, b) { return a.date - b.date; });
-  return out.slice(0, 4);
+  return out.slice(0, 3);
 }
 function renderCountdown() {
   var today = new Date();
   $("countdown").innerHTML = upcoming().map(function (e) {
     var n = dayDiff(today, e.date);
-    var dd = e.running ? "NU<small>i gang</small>" : n === 0 ? "🎉<small>i dag</small>" : n === 1 ? "1<small>dag</small>" : n + "<small>dage</small>";
-    return '<div class="cd' + (n === 0 ? " today" : "") + '"><div class="ic">' + e.ic + '</div><div class="nm">' + esc(e.navn) + "<small>" + esc(e.note) + '</small></div><div class="dd">' + dd + "</div></div>";
+    var dd = e.running ? "NU" : n === 0 ? "i dag" : n + " d";
+    return '<div class="cd' + (n === 0 ? " today" : "") + '"><div class="ic">' + e.ic + '</div><div class="nm">' + esc(e.navn) + '</div><div class="dd">' + esc(dd) + "</div></div>";
   }).join("");
+  sizeKamera();
 }
 
 // ---------- Affald (data.json) ----------
@@ -614,6 +615,33 @@ function renderAlerts(list) {
   }).join("");
 }
 var feedOk = 0, failCount = 0, timer = 0;
+function sizeKamera() {
+  var row = document.querySelector("#kameraPan .kam-row");
+  if (!row) return;
+  var views = [$("kam1"), $("kam2")];
+  var tiles = row.querySelectorAll(".kam-tile");
+  var rh = row.clientHeight, i, box, tile, tw, per, h, w;
+  if (rh < 8) return;
+  per = Math.floor((rh - 8) / 2);
+  for (i = 0; i < views.length; i++) {
+    box = views[i]; if (!box) continue;
+    tile = tiles[i] || box.parentNode;
+    tw = tile.clientWidth || 0;
+    if (!tw) continue;
+    h = Math.max(60, Math.min(per, Math.round(tw * 9 / 16)));
+    w = Math.round(h * 16 / 9);
+    if (w > tw) { w = tw; h = Math.round(w * 9 / 16); }
+    box.style.height = h + "px";
+    box.style.width = w + "px";
+    box.style.marginLeft = w < tw ? "auto" : "0";
+    box.style.marginRight = w < tw ? "auto" : "0";
+    var lab = tile.querySelector(".kam-label");
+    if (lab) {
+      lab.style.left = (box.offsetLeft + 8) + "px";
+      lab.style.top = (box.offsetTop + 6) + "px";
+    }
+  }
+}
 function kamOff(el, title, sub) {
   el.className = "kam-view";
   el.innerHTML = '<div class="kam-off">' + esc(title) + "<small>" + esc(sub) + "</small></div>";
@@ -756,6 +784,10 @@ setInterval(function () {
 tickClock(); setInterval(tickClock, 1000);
 renderPlan(); renderCountdown(); renderQuote(); renderTrash(); renderStatus();
 loadData(); poll();
+sizeKamera();
+setTimeout(sizeKamera, 50);
+setTimeout(sizeKamera, 400);
+window.addEventListener("resize", function () { setTimeout(sizeKamera, 50); });
 setInterval(renderPlan, 5 * 60e3);
 setInterval(shift, 2 * 60e3);
 window.__vaeg = { version: VERSION, refreshAll: refreshAll, hardReload: hardReload, upcoming: upcoming, isoWeek: isoWeek, state: function () { return { unlocked: unlocked, audio: actx ? actx.state : "none", feedOk: feedOk, alerts: document.querySelectorAll(".al").length }; } };

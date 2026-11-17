@@ -124,6 +124,12 @@ html,body{margin:0;height:100%;background:#000306;color:#bff6ff;font-family:var(
 #unlock div{border:1px solid rgba(var(--cy),.6);padding:24px 38px;color:#dffcff;font-size:24px;letter-spacing:.08em;background:rgba(0,40,60,.6);text-align:center;box-shadow:0 0 30px rgba(var(--cy),.25)}
 #unlock small{display:block;margin-top:9px;font-size:14px;color:rgba(var(--cy),.7)}
 #hint{position:fixed;z-index:9;left:50%;-webkit-transform:translateX(-50%);transform:translateX(-50%);top:34px;display:none;background:rgba(0,40,60,.75);color:#dffcff;border:1px solid rgba(var(--cy),.5);border-radius:4px;padding:6px 12px;font:600 13px var(--mono);letter-spacing:.06em;cursor:pointer}
+#talk{position:fixed;z-index:7;right:18px;bottom:86px;min-width:56px;min-height:56px;padding:0 20px 0 16px;display:-webkit-box;display:flex;-webkit-box-align:center;align-items:center;background:rgba(0,26,40,.78);color:#dffcff;border:1px solid rgba(var(--cy),.55);border-radius:999px;font:600 15px/1 var(--mono);letter-spacing:.08em;text-decoration:none;cursor:pointer;box-shadow:0 0 16px rgba(var(--cy),.32),inset 0 0 10px rgba(var(--cy),.08);-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+#talk svg{display:block;width:22px;height:22px;margin-right:10px}
+#talk:active,#talk.pulse{color:#effeff;border-color:rgb(var(--cy));background:rgba(0,48,68,.9);box-shadow:0 0 24px rgba(var(--cy),.85),inset 0 0 14px rgba(var(--cy),.22)}
+#talk.pulse{-webkit-animation:talkp .34s ease-out;animation:talkp .34s ease-out}
+@-webkit-keyframes talkp{0%{-webkit-transform:scale(1)}40%{-webkit-transform:scale(1.06)}100%{-webkit-transform:scale(1)}}
+@keyframes talkp{0%{transform:scale(1)}40%{transform:scale(1.06)}100%{transform:scale(1)}}
 </style>
 </head>
 <body>
@@ -162,12 +168,13 @@ html,body{margin:0;height:100%;background:#000306;color:#bff6ff;font-family:var(
 <div id="fx"></div><div id="sweep"></div>
 <div id="banner"><div class="m" id="bannerMeta"></div><div class="t" id="bannerText"></div></div>
 <button id="hint">🔇 TRYK FOR LYD</button>
+<a id="talk" href="shortcuts://run-shortcut?name=Jarvis"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="9" y="2.5" width="6" height="11" rx="3" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M6.5 11.5a5.5 5.5 0 0 0 11 0" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M12 17v3.2M8.5 20.5h7" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg><span>Tal til Jarvis</span></a>
 <div id="unlock"><div>TRYK FOR AT AKTIVERE LYD<small>og holde skærmen tændt</small></div></div>
 <script>
 (function () {
 "use strict";
 // ===== Konfiguration =====
-var VERSION = "2026-11-13-v3e";
+var VERSION = "2026-11-17-v3f";
 var SHEET_ID = "1_SjOK0DQG3GgGA3X7HCLNKHOP8cP3NDSFpsZ-6WKF_k";
 var POLL_SECONDS = 60;
 // Familie: [navn, dag, måned, fødselsår, ikon]
@@ -578,6 +585,27 @@ overlay.addEventListener("click", function () {
   if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
   pump();
 });
+// iOS-genvej: åbn Shortcuts og kør "Jarvis". Ingen webhook og ingen nøgle.
+// Første tryk efter genindlæsning (eller overlayet) låser kun lyden op og navigerer ikke.
+var talkBtn = $("talk"), talkLockedTap = false, skipTalkUntilGesture = resumed;
+if (talkBtn) {
+  document.addEventListener("pointerdown", function (e) {
+    var t = e.target;
+    var hit = t === talkBtn || (t && talkBtn.contains(t));
+    if (hit) talkLockedTap = !unlocked || skipTalkUntilGesture;
+    if (skipTalkUntilGesture) skipTalkUntilGesture = false;
+  }, true);
+  talkBtn.addEventListener("pointerdown", function (e) { e.stopPropagation(); });
+  talkBtn.addEventListener("click", function (e) {
+    e.preventDefault();
+    e.stopPropagation();
+    if (talkLockedTap || document.getElementById("unlock")) { talkLockedTap = false; return; }
+    if (talkBtn.className === "pulse") return;
+    talkBtn.className = "pulse";
+    var url = "shortcuts://run-shortcut?name=" + encodeURIComponent("Jarvis");
+    setTimeout(function () { talkBtn.className = ""; window.location.href = url; }, 280);
+  });
+}
 if (resumed) {
   if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
   unlockAudio(false);
